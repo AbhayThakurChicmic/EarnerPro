@@ -638,6 +638,7 @@ $("shareBtn").addEventListener("click",()=>{
     cl.addEventListener("click",()=>ov.style.display="none");
     const sh=document.createElement("button"); sh.type="button"; sh.className="btn"; sh.textContent="Share";
     sh.addEventListener("click",async()=>{
+      track("share_sheet",{machine:sel.value});
       try{
         const blob=await (await fetch(shareUrl)).blob();
         const file=new File([blob],shareName,{type:"image/png"});
@@ -670,7 +671,10 @@ function applyMachineDefaults(){
 sel.addEventListener("change",()=>{
   applyMachineDefaults();
   calc();
+  track("machine_select",{machine:sel.value,source_listing:SOURCE});
 });
+selB.addEventListener("change",()=>track("machine_select",{machine:selB.value,compare:true,source_listing:SOURCE}));
+$("shareBtn").addEventListener("click",()=>track("share_tap",{machine:sel.value,source_listing:SOURCE}));
 $("fuelUnit").addEventListener("change",()=>{
   const b=+$("fuelBurn").value||0;
   $("fuelBurn").value=isGal()? +(b/GAL).toFixed(1) : +(b*GAL).toFixed(1);
@@ -711,6 +715,22 @@ function applyUrlParams(){
   if(wear!==null) $("ucWear").value=Math.round(wear);
   if(year!==null) $("year").value=Math.round(year);
   if(rate!==null) $("rate").value=rate;   // finance interest rate, % p.a.
+}
+
+// ── analytics (GA4): visits, machine selections, report unlocks, share taps, source listing ──
+const GA_ID="";   // GA4 Measurement ID ("G-XXXXXXX") — tracking is off while empty
+function track(name,params={}){ if(window.gtag) window.gtag("event",name,params); }
+if(GA_ID){
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=function(){ dataLayer.push(arguments); };
+  gtag("js",new Date());
+  gtag("config",GA_ID);
+  // load the tag after the page so it doesn't compete with first paint on 4G
+  addEventListener("load",()=>{
+    const t=document.createElement("script"); t.async=true;
+    t.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(GA_ID);
+    document.head.appendChild(t);
+  });
 }
 
 // ── lead capture: email gate on the weekly breakdown; verdict plate stays visible ──
@@ -816,6 +836,7 @@ $("leadGate").addEventListener("submit",e=>{
   store.set(UNLOCK_KEY,{email,at:lead.submitted_at});
   setLocked(false);
   flushLeads();
+  track("report_unlock",{machine:lead.inputs.machine,verdict:lead.results.verdict,source_listing:SOURCE});
 });
 
 // ── boot: machine DB is served separately so it can be updated without redeploying ──
@@ -838,6 +859,7 @@ async function boot(){
   applyUrlParams();
   calc();
   setLocked(!isUnlocked());
+  track("tool_open",{source_listing:SOURCE,machine:sel.value,prefilled:PREFILL.matched,returning_lead:isUnlocked()});
 }
 boot();
 flushLeads();

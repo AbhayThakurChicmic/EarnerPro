@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earner-Pro — Machine Viability by Makin Traks</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@400;600&display=swap');
+:root{
+  --blue:#141414; --amber:#FFB000; --jet:#0A0A0A; --bone:#F6F8FA;
+  --steel:#1A1A1A; --line:#3A3A3A; --good:#3FB950; --warn:#FFB000; --bad:#F85149;
+  --dim:#9AA7B8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--jet);color:var(--bone);font-family:'Inter',system-ui,sans-serif}
+.header{background:linear-gradient(180deg,#1E1E1E 0%,#0D0D0D 100%);padding:16px 18px 13px;border-bottom:3px solid var(--amber);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.brand{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:29px;letter-spacing:.03em;text-transform:uppercase;line-height:1}
+.brand span{color:var(--amber)}
+.sub{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#9A9A9A;margin-top:4px;letter-spacing:.05em}
+.hdrsel{background:#1A1A1A;border:1px solid #6B5A20;border-radius:6px;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:13px;padding:6px 8px}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+.card{background:var(--steel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.card h2{display:flex;align-items:baseline;gap:8px;margin:0 0 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:.04em;text-transform:uppercase}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:1px 6px;letter-spacing:.06em;font-weight:400}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.span2{grid-column:1/-1}
+label.f{display:block}
+.lbl{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;font-weight:600}
+.lbl b{color:var(--amber);margin-left:5px;font-weight:600}
+.hint{font-size:11.5px;color:var(--dim);margin-top:4px}
+input[type=number],select{width:100%;background:var(--jet);border:1px solid var(--line);border-radius:6px;color:var(--bone);font-family:'IBM Plex Mono',monospace;font-size:15px;padding:9px 10px;outline:none}
+input:focus,select:focus{border-color:var(--amber)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:36px;background:transparent;margin:2px 0}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--amber);margin-top:-9px;border:3px solid #0A0A0A;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+input[type=range]::-moz-range-track{height:10px;border-radius:5px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--amber);border:3px solid #0A0A0A;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+.row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px dashed var(--line)}
+.row .l{font-size:13.5px;color:var(--dim)}
+.row .v{font-family:'IBM Plex Mono',monospace;font-size:14px;color:#C9D4E0}
+.row.strong .l{color:var(--bone)}
+.row.strong .v{font-size:16px;font-weight:700;color:var(--bone)}
+
+/* ── Verdict data plate ── */
+.plate{background:linear-gradient(180deg,#232323 0%,#121212 100%);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px;position:relative}
+.vlabel{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;font-weight:700;margin-bottom:6px;transition:color .5s}
+.bignum{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:44px;line-height:1.05;font-variant-numeric:tabular-nums;transition:color .5s}
+.mini{font-size:11px;color:var(--dim)}
+.miniv{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600}
+.minis{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
+/* week gauge */
+.gauge{margin-top:16px}
+.gaugebar{position:relative;height:26px;background:var(--jet);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.gaugefill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#7A5A00,var(--amber));transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.gaugetick{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.gaugeday{position:absolute;top:100%;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--dim);transform:translateX(-50%);margin-top:3px}
+.gaugecap{font-size:12.5px;margin-top:22px}
+.gaugecap b{color:var(--amber)}
+
+/* donut */
+.donutwrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.legend{flex:1;min-width:200px}
+.leg{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12.5px;color:var(--dim)}
+.leg i{width:10px;height:10px;border-radius:2px;flex:none}
+.leg .lv{margin-left:auto;font-family:'IBM Plex Mono',monospace;color:#C9D4E0}
+
+/* compare */
+.cmpgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.cmpcard{background:var(--jet);border:1px solid var(--line);border-radius:10px;padding:12px;position:relative}
+.cmpcard.win{border-color:var(--good)}
+.winchip{position:absolute;top:-9px;right:10px;background:var(--good);color:var(--jet);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;padding:2px 8px;border-radius:4px}
+.cmpname{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px}
+.cmprow{display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);padding:3px 0}
+.cmprow b{font-family:'IBM Plex Mono',monospace;font-weight:600;color:#C9D4E0}
+
+.tbtn{flex:1;background:var(--jet);border:1px solid var(--line);border-radius:6px;color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.05em;text-transform:uppercase;padding:10px 8px;cursor:pointer}
+.tbtn.active{background:var(--amber);border-color:var(--amber);color:var(--jet)}
+.chk{display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer;font-size:14px}
+.chk input{width:18px;height:18px;accent-color:var(--amber)}
+.cta{background:linear-gradient(180deg,#1E1E1E 0%,#0D0D0D 100%);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;margin-bottom:20px}
+.cta h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.03em;margin:0}
+.cta p{font-size:13.5px;color:#B9B9B9;margin:6px 0 12px}
+.btn{display:inline-block;background:var(--amber);color:var(--jet);border:none;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;text-transform:uppercase;letter-spacing:.05em;padding:11px 26px;border-radius:6px;text-decoration:none;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--amber);border:1px solid var(--amber)}
+.contact{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#9A9A9A;margin-top:10px}
+.fine{font-size:11px;color:#6B7789;padding-bottom:30px;line-height:1.5}
+.sliderhead{display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px}
+.sliderhead .val{font-family:'IBM Plex Mono',monospace;font-weight:700}
+.clik{margin-top:10px;padding:10px 12px;background:var(--jet);border:1px solid var(--amber);border-radius:6px;font-size:13px}
+.clik b{color:var(--amber)}
+@media(max-width:520px){.cmpgrid{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="brand">Earner<span>-Pro</span></div>
+    <div class="sub">MACHINE VIABILITY · BY MAKIN TRAKS · WORLDWIDE · V3.1</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <select id="region" class="hdrsel">
+      <option value="AU" selected>Australia</option><option value="US">USA</option>
+      <option value="UK">UK</option><option value="EU">Europe</option>
+      <option value="NZ">New Zealand</option><option value="CA">Canada</option>
+      <option value="ZA">South Africa</option><option value="CN">China</option><option value="XX">Other</option>
+    </select>
+    <select id="currency" class="hdrsel">
+      <option value="A$" selected>AUD A$</option><option value="US$">USD US$</option>
+      <option value="€">EUR €</option><option value="£">GBP £</option>
+      <option value="NZ$">NZD NZ$</option><option value="C$">CAD C$</option>
+      <option value="R">ZAR R</option><option value="¥">CNY ¥</option><option value="$">Other $</option>
+    </select>
+    <select id="fuelUnit" class="hdrsel">
+      <option value="L" selected>per litre</option><option value="gal">per US gal</option>
+    </select>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- VERDICT DATA PLATE -->
+  <div class="plate" id="plate">
+    <div class="vlabel" id="verdictLabel">●</div>
+    <div class="mini" id="netLabel">Net profit / week (after repayments)</div>
+    <div class="bignum" id="netProfit">0</div>
+    <div class="minis">
+      <div><div class="mini">Annual (48 wks)</div><div class="miniv" id="annual">0</div></div>
+      <div><div class="mini">Break-even</div><div class="miniv" id="breakeven">0 hrs/wk</div></div>
+      <div><div class="mini" id="paybackLabel">Deposit payback</div><div class="miniv" id="payback">—</div></div>
+    </div>
+    <div class="gauge">
+      <div class="gaugebar" id="gaugebar"><div class="gaugefill" id="gaugefill"></div></div>
+      <div class="gaugecap" id="gaugecap"></div>
+    </div>
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:10px;color:#6B7789;letter-spacing:.04em" id="basisLine">
+      BASIS: 48 PAID WKS/YR · CASH-FLOW VIEW · LIFETIME OVER 4,000 HRS · SERVICING AGE-ADJUSTED · ALL FIGURES ADJUSTABLE GUIDES
+    </div>
+  </div>
+
+  <!-- WHERE THE MONEY GOES -->
+  <div class="card">
+    <h2>Where the week's revenue goes</h2>
+    <div class="donutwrap">
+      <canvas id="donut" width="360" height="360" style="width:180px;height:180px"></canvas>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+
+  <!-- WHOLE OF LIFE -->
+  <div class="card">
+    <h2>Whole-of-life <span class="tag" id="lifeTag">4,000 HRS</span></h2>
+    <div class="minis" style="margin-top:0">
+      <div><div class="mini">All-in cost per operating hour</div><div class="miniv" id="lifeCph">—</div></div>
+      <div><div class="mini">Profit per operating hour</div><div class="miniv" id="lifePph" style="color:var(--good)">—</div></div>
+      <div><div class="mini" id="lifeTotalLbl">Lifetime profit</div><div class="miniv" id="lifeTotal">—</div></div>
+      <div><div class="mini" id="lifeYearsLbl">Years to resale</div><div class="miniv" id="lifeYears">—</div></div>
+    </div>
+  </div>
+
+  <!-- MACHINE -->
+  <div class="card">
+    <h2>Machine</h2>
+    <div class="grid2">
+      <label class="f span2"><div class="lbl">Model</div><select id="machine"></select></label>
+      <label class="f"><div class="lbl">Year</div><input type="number" id="year" value="2026"></label>
+      <label class="f"><div class="lbl">Hours</div><input type="number" id="hours" value="0" step="100"></label>
+      <label class="f span2"><div class="lbl">Purchase price</div><input type="number" id="price" step="1000">
+        <div class="hint">Guide only — enter your actual local price. Resale below auto-fills at 20% unless you change it.</div>
+      </label>
+    </div>
+    <label class="chk" style="margin-top:14px;margin-bottom:0"><input type="checkbox" id="useCompare"> Compare with another machine</label>
+    <div id="compareBlock" style="display:none">
+      <label class="f" style="margin-top:8px"><div class="lbl">Compare against</div><select id="machineB"></select></label>
+      <div class="cmpgrid" id="cmpgrid"></div>
+    </div>
+  </div>
+
+  <!-- UNDERCARRIAGE -->
+  <div class="card">
+    <h2>Undercarriage</h2>
+    <div class="sliderhead"><span style="color:var(--dim)">Measured wear</span><span class="val" id="ucVal">0% worn</span></div>
+    <input type="range" id="ucWear" min="0" max="100" value="0">
+    <div id="ucDetail"></div>
+  </div>
+
+  <!-- OPERATIONS -->
+  <div class="card">
+    <h2>Operations</h2>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button type="button" data-mode="owner" class="tbtn active">Owner-operator</button>
+      <button type="button" data-mode="paid" class="tbtn">Paid operator</button>
+    </div>
+    <div class="grid2">
+      <label class="f"><div class="lbl">Fuel price <b id="fuelLbl">A$/L</b></div><input type="number" id="fuelPrice" value="1.90" step="0.05"></label>
+      <label class="f"><div class="lbl">Fuel burn <b id="burnLbl">L/hr</b></div><input type="number" id="fuelBurn" value="4" step="0.5"></label>
+      <label class="f"><div class="lbl">Charge-out <b>/hr</b></div><input type="number" id="chargeRate" value="135" step="5">
+        <div class="hint">Guide: A$135/hr wet hire (AU) — adjust to your local rate</div>
+      </label>
+      <label class="f"><div class="lbl">Week <b>hrs</b></div><input type="number" id="weekHours" value="40"></label>
+      <label class="f" id="opRateField" style="display:none"><div class="lbl">Operator <b>/hr</b></div><input type="number" id="operatorRate" value="60" step="5"></label>
+      <label class="f span2"><div class="lbl">Servicing &amp; repairs <b>/hr base</b></div><input type="number" id="maintRate" value="5" step="1">
+        <div class="hint" id="maintNote"></div>
+      </label>
+    </div>
+    <div style="margin-top:12px">
+      <div class="sliderhead"><span class="lbl" style="margin-bottom:0">Utilisation <b>%</b></span><span class="val" style="color:var(--amber)" id="utilVal">85%</span></div>
+      <input type="range" id="utilisation" min="40" max="100" value="85">
+    </div>
+  </div>
+
+  <!-- FINANCE -->
+  <div class="card">
+    <h2>Finance</h2>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button type="button" data-fin="yes" class="tbtn fbtn active">Finance</button>
+      <button type="button" data-fin="no" class="tbtn fbtn">Cash buyer</button>
+    </div>
+    <div id="financeBlock">
+      <div class="grid3">
+        <label class="f"><div class="lbl">Deposit <b>%</b></div><input type="number" id="deposit" value="20" step="5"></label>
+        <label class="f"><div class="lbl">Rate <b>% p.a.</b></div><input type="number" id="rate" value="8.5" step="0.25"></label>
+        <label class="f"><div class="lbl">Term <b>yrs</b></div><input type="number" id="term" value="5"></label>
+      </div>
+      <div style="margin-top:10px">
+        <div class="row"><span class="l">Amount financed</span><span class="v" id="financed">0</span></div>
+        <div class="row strong"><span class="l">Weekly repayment</span><span class="v" style="color:var(--amber)" id="repay">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEKLY NUMBERS -->
+  <div class="card">
+    <h2>Weekly numbers</h2>
+    <div id="numbers"></div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="btn ghost" id="shareBtn">Share / save my report</button>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h3>These are your real numbers.</h3>
+    <p id="ctaMachine"></p>
+    <a class="btn" href="tel:+61402940490">Talk to Makin Traks</a>
+    <div class="contact">Daz Scale · +61 402 940 490 · mkntraks@gmail.com · Sunshine Coast, Australia</div>
+    <div class="contact" style="margin-top:4px">CLIK undercarriage components ship worldwide · 3-year guarantee</div>
+  </div>
+
+  <div class="fine">
+    Estimates only — fuel burn, servicing and track/undercarriage figures are indicative averages; verify against your own records.
+    Not financial advice. Finance subject to lender approval.
+    Rippa machines carry a 3-year manufacturer's warranty; the Makin Traks 3-month powertrain warranty applies to used machines only.
+    <div style="margin-top:10px;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em">EARNER-PRO V3.1 · © MAKIN TRAKS 2026 · MOUNTAIN GLEN ENTERPRISES PTY LTD</div>
+  </div>
+</div>
+
+<canvas id="shareCanvas" width="1000" height="1560" style="display:none"></canvas>
+
+<script>
+const MACHINES = {"Caterpillar D1": {"cat": "Dozer", "fuel": 12, "maint": 12, "ucCost": 26000, "ucLife": 4000, "ucType": "steel", "price": 84000, "res": 17000}, "Caterpillar D2": {"cat": "Dozer", "fuel": 13, "maint": 12, "ucCost": 27000, "ucLife": 4000, "ucType": "steel", "price": 88000, "res": 17500}, "Caterpillar D3": {"cat": "Dozer", "fuel": 13, "maint": 13, "ucCost": 28000, "ucLife": 4000, "ucType": "steel", "price": 99000, "res": 20000}, "Caterpillar D4 LGP": {"cat": "Dozer", "fuel": 15, "maint": 14, "ucCost": 32000, "ucLife": 4000, "ucType": "steel", "price": 136000, "res": 27000}, "Caterpillar D5": {"cat": "Dozer", "fuel": 19, "maint": 17, "ucCost": 40000, "ucLife": 4000, "ucType": "steel", "price": 178000, "res": 35500}, "Caterpillar D6K2 XL": {"cat": "Dozer", "fuel": 20, "maint": 18, "ucCost": 42000, "ucLife": 4000, "ucType": "steel", "price": 142000, "res": 28500}, "Caterpillar D6N XL": {"cat": "Dozer", "fuel": 24, "maint": 20, "ucCost": 48000, "ucLife": 4000, "ucType": "steel", "price": 185000, "res": 37000}, "Caterpillar D6T XL": {"cat": "Dozer", "fuel": 28, "maint": 22, "ucCost": 40000, "ucLife": 4750, "ucType": "steel", "price": 226000, "res": 45000}, "Caterpillar D6T LGP": {"cat": "Dozer", "fuel": 29, "maint": 22, "ucCost": 40000, "ucLife": 4750, "ucType": "steel", "price": 247000, "res": 49500}, "Caterpillar D6 XE": {"cat": "Dozer", "fuel": 24, "maint": 22, "ucCost": 40000, "ucLife": 4750, "ucType": "steel", "price": 242000, "res": 48500}, "Caterpillar D7": {"cat": "Dozer", "fuel": 36, "maint": 27, "ucCost": 68000, "ucLife": 4000, "ucType": "steel", "price": 278000, "res": 55500}, "Caterpillar D8T": {"cat": "Dozer", "fuel": 45, "maint": 32, "ucCost": 85000, "ucLife": 4000, "ucType": "steel", "price": 410000, "res": 82000}, "Caterpillar D9": {"cat": "Dozer", "fuel": 58, "maint": 40, "ucCost": 110000, "ucLife": 4000, "ucType": "steel", "price": 514000, "res": 103000}, "Komatsu D39PX-24": {"cat": "Dozer", "fuel": 14, "maint": 13, "ucCost": 30000, "ucLife": 4000, "ucType": "steel", "price": 103000, "res": 20500}, "Komatsu D51PX-24": {"cat": "Dozer", "fuel": 19, "maint": 17, "ucCost": 40000, "ucLife": 4000, "ucType": "steel", "price": 142000, "res": 28500}, "Komatsu D61PX-24": {"cat": "Dozer", "fuel": 25, "maint": 20, "ucCost": 48000, "ucLife": 4000, "ucType": "steel", "price": 194000, "res": 39000}, "Komatsu D65PX-18": {"cat": "Dozer", "fuel": 30, "maint": 23, "ucCost": 56000, "ucLife": 4000, "ucType": "steel", "price": 226000, "res": 45000}, "Komatsu D85EX-18": {"cat": "Dozer", "fuel": 37, "maint": 27, "ucCost": 70000, "ucLife": 4000, "ucType": "steel", "price": 294000, "res": 59000}, "Komatsu D155AX-8": {"cat": "Dozer", "fuel": 47, "maint": 33, "ucCost": 88000, "ucLife": 4000, "ucType": "steel", "price": 415000, "res": 83000}, "John Deere 700L": {"cat": "Dozer", "fuel": 18, "maint": 17, "ucCost": 38000, "ucLife": 4000, "ucType": "steel", "price": 152000, "res": 30500}, "John Deere 750L": {"cat": "Dozer", "fuel": 24, "maint": 20, "ucCost": 46000, "ucLife": 4000, "ucType": "steel", "price": 195000, "res": 39000}, "John Deere 850L": {"cat": "Dozer", "fuel": 32, "maint": 24, "ucCost": 58000, "ucLife": 4000, "ucType": "steel", "price": 235000, "res": 47000}, "John Deere 950K": {"cat": "Dozer", "fuel": 38, "maint": 28, "ucCost": 72000, "ucLife": 4000, "ucType": "steel", "price": 346000, "res": 69000}, "Liebherr PR736": {"cat": "Dozer", "fuel": 26, "maint": 22, "ucCost": 52000, "ucLife": 4000, "ucType": "steel", "price": 215000, "res": 43000}, "Shantui SD22": {"cat": "Dozer", "fuel": 32, "maint": 24, "ucCost": 42000, "ucLife": 3500, "ucType": "steel", "price": 247000, "res": 49500}, "Caterpillar 313": {"cat": "Excavator", "fuel": 11, "maint": 12, "ucCost": 22000, "ucLife": 5000, "ucType": "steel", "price": 115000, "res": 23000}, "Caterpillar 320": {"cat": "Excavator", "fuel": 16, "maint": 15, "ucCost": 30000, "ucLife": 5000, "ucType": "steel", "price": 190000, "res": 38000}, "Caterpillar 323": {"cat": "Excavator", "fuel": 18, "maint": 16, "ucCost": 32000, "ucLife": 5000, "ucType": "steel", "price": 217000, "res": 43500}, "Caterpillar 330": {"cat": "Excavator", "fuel": 21, "maint": 18, "ucCost": 38000, "ucLife": 5000, "ucType": "steel", "price": 262000, "res": 52500}, "Caterpillar 336": {"cat": "Excavator", "fuel": 27, "maint": 21, "ucCost": 46000, "ucLife": 5000, "ucType": "steel", "price": 319000, "res": 64000}, "Caterpillar 349": {"cat": "Excavator", "fuel": 35, "maint": 26, "ucCost": 60000, "ucLife": 5000, "ucType": "steel", "price": 420000, "res": 84000}, "Komatsu PC138US-11": {"cat": "Excavator", "fuel": 11, "maint": 12, "ucCost": 22000, "ucLife": 5000, "ucType": "steel", "price": 121000, "res": 24000}, "Komatsu PC210LC-11": {"cat": "Excavator", "fuel": 16, "maint": 15, "ucCost": 30000, "ucLife": 5000, "ucType": "steel", "price": 191000, "res": 38000}, "Komatsu PC300LC-11": {"cat": "Excavator", "fuel": 22, "maint": 18, "ucCost": 39000, "ucLife": 5000, "ucType": "steel", "price": 268000, "res": 53500}, "Komatsu PC360LC-11": {"cat": "Excavator", "fuel": 26, "maint": 20, "ucCost": 45000, "ucLife": 5000, "ucType": "steel", "price": 308000, "res": 61500}, "Komatsu PC490LC-11": {"cat": "Excavator", "fuel": 34, "maint": 25, "ucCost": 58000, "ucLife": 5000, "ucType": "steel", "price": 412000, "res": 82500}, "Hitachi ZX135US-6": {"cat": "Excavator", "fuel": 11, "maint": 12, "ucCost": 22000, "ucLife": 5000, "ucType": "steel", "price": 119000, "res": 24000}, "Hitachi ZX200-6": {"cat": "Excavator", "fuel": 16, "maint": 15, "ucCost": 29000, "ucLife": 5000, "ucType": "steel", "price": 179000, "res": 36000}, "Hitachi ZX350LC-6": {"cat": "Excavator", "fuel": 25, "maint": 20, "ucCost": 44000, "ucLife": 5000, "ucType": "steel", "price": 301000, "res": 60000}, "Volvo EC220E": {"cat": "Excavator", "fuel": 16, "maint": 15, "ucCost": 30000, "ucLife": 5000, "ucType": "steel", "price": 191000, "res": 38000}, "Volvo EC300E": {"cat": "Excavator", "fuel": 21, "maint": 18, "ucCost": 39000, "ucLife": 5000, "ucType": "steel", "price": 264000, "res": 53000}, "Volvo EC480E": {"cat": "Excavator", "fuel": 34, "maint": 25, "ucCost": 58000, "ucLife": 5000, "ucType": "steel", "price": 421000, "res": 84000}, "Kobelco SK210LC-11": {"cat": "Excavator", "fuel": 15, "maint": 15, "ucCost": 29000, "ucLife": 5000, "ucType": "steel", "price": 184000, "res": 37000}, "Kobelco SK350LC-11": {"cat": "Excavator", "fuel": 25, "maint": 20, "ucCost": 44000, "ucLife": 5000, "ucType": "steel", "price": 303000, "res": 60500}, "Sany SY215C": {"cat": "Excavator", "fuel": 17, "maint": 15, "ucCost": 26000, "ucLife": 4500, "ucType": "steel", "price": 183000, "res": 36500}, "XCMG XE215C": {"cat": "Excavator", "fuel": 17, "maint": 15, "ucCost": 26000, "ucLife": 4500, "ucType": "steel", "price": 183000, "res": 36500}, "Develon (Doosan) DX225LC-7": {"cat": "Excavator", "fuel": 16, "maint": 15, "ucCost": 29000, "ucLife": 5000, "ucType": "steel", "price": 190000, "res": 38000}, "JCB JS220": {"cat": "Excavator", "fuel": 16, "maint": 15, "ucCost": 30000, "ucLife": 5000, "ucType": "steel", "price": 188000, "res": 37500}, "Rippa R18 PRO": {"cat": "Mini excavator", "fuel": 4, "maint": 5, "ucCost": 700, "ucLife": 1000, "ucType": "rubber", "price": 26990, "res": 5500}, "Rippa R25": {"cat": "Mini excavator", "fuel": 4.5, "maint": 5, "ucCost": 800, "ucLife": 1000, "ucType": "rubber", "price": 34990, "res": 7000}, "Caterpillar 301.8": {"cat": "Mini excavator", "fuel": 3.5, "maint": 6, "ucCost": 900, "ucLife": 1000, "ucType": "rubber", "price": 46000, "res": 9000}, "Caterpillar 302.5": {"cat": "Mini excavator", "fuel": 4, "maint": 6, "ucCost": 950, "ucLife": 1000, "ucType": "rubber", "price": 65000, "res": 13000}, "Caterpillar 303.5": {"cat": "Mini excavator", "fuel": 4.5, "maint": 7, "ucCost": 1100, "ucLife": 1100, "ucType": "rubber", "price": 89000, "res": 18000}, "Caterpillar 305 CR": {"cat": "Mini excavator", "fuel": 6, "maint": 8, "ucCost": 1300, "ucLife": 1200, "ucType": "rubber", "price": 127000, "res": 25500}, "Kubota U17-3": {"cat": "Mini excavator", "fuel": 3.5, "maint": 6, "ucCost": 900, "ucLife": 1000, "ucType": "rubber", "price": 41000, "res": 8000}, "Kubota KX018-4": {"cat": "Mini excavator", "fuel": 3.5, "maint": 6, "ucCost": 900, "ucLife": 1000, "ucType": "rubber", "price": 43000, "res": 8500}, "Kubota U55-4": {"cat": "Mini excavator", "fuel": 6, "maint": 8, "ucCost": 1300, "ucLife": 1200, "ucType": "rubber", "price": 134000, "res": 27000}, "Kubota KX040-4": {"cat": "Mini excavator", "fuel": 5.5, "maint": 7, "ucCost": 1200, "ucLife": 1200, "ucType": "rubber", "price": 103000, "res": 20500}, "Bobcat E20": {"cat": "Mini excavator", "fuel": 3.5, "maint": 6, "ucCost": 900, "ucLife": 1000, "ucType": "rubber", "price": 48000, "res": 9500}, "Bobcat E35": {"cat": "Mini excavator", "fuel": 4.5, "maint": 7, "ucCost": 1100, "ucLife": 1100, "ucType": "rubber", "price": 84000, "res": 17000}, "Bobcat E50": {"cat": "Mini excavator", "fuel": 6, "maint": 8, "ucCost": 1300, "ucLife": 1200, "ucType": "rubber", "price": 120000, "res": 24000}, "Takeuchi TB216": {"cat": "Mini excavator", "fuel": 3.5, "maint": 6, "ucCost": 900, "ucLife": 1000, "ucType": "rubber", "price": 46000, "res": 9000}, "Takeuchi TB240": {"cat": "Mini excavator", "fuel": 5, "maint": 7, "ucCost": 1200, "ucLife": 1200, "ucType": "rubber", "price": 96000, "res": 19000}, "Yanmar ViO17": {"cat": "Mini excavator", "fuel": 3.5, "maint": 6, "ucCost": 900, "ucLife": 1000, "ucType": "rubber", "price": 41000, "res": 8000}, "Yanmar ViO35": {"cat": "Mini excavator", "fuel": 4.5, "maint": 7, "ucCost": 1100, "ucLife": 1100, "ucType": "rubber", "price": 86000, "res": 17000}, "Sany SY16C": {"cat": "Mini excavator", "fuel": 3.5, "maint": 5, "ucCost": 750, "ucLife": 1000, "ucType": "rubber", "price": 42000, "res": 8500}, "Rippa RS06 PRO": {"cat": "Skid steer / CTL", "fuel": 5, "maint": 5, "ucCost": 700, "ucLife": 1000, "ucType": "rubber", "price": 22990, "res": 4500}, "Rippa RL06 (wheel loader)": {"cat": "Skid steer / CTL", "fuel": 5, "maint": 5, "ucCost": 1200, "ucLife": 2000, "ucType": "tyres", "price": 19990, "res": 4000}, "Caterpillar 226D3": {"cat": "Skid steer / CTL", "fuel": 8, "maint": 9, "ucCost": 2000, "ucLife": 2500, "ucType": "tyres", "price": 68000, "res": 13500}, "Caterpillar 262D3": {"cat": "Skid steer / CTL", "fuel": 10, "maint": 10, "ucCost": 2400, "ucLife": 2500, "ucType": "tyres", "price": 96000, "res": 19000}, "Caterpillar 299D3 XE": {"cat": "Skid steer / CTL", "fuel": 12, "maint": 12, "ucCost": 5000, "ucLife": 1200, "ucType": "rubber", "price": 143000, "res": 28500}, "Bobcat S70": {"cat": "Skid steer / CTL", "fuel": 4.5, "maint": 6, "ucCost": 1400, "ucLife": 2500, "ucType": "tyres", "price": 34000, "res": 7000}, "Bobcat S650": {"cat": "Skid steer / CTL", "fuel": 10, "maint": 10, "ucCost": 2400, "ucLife": 2500, "ucType": "tyres", "price": 99000, "res": 20000}, "Bobcat T66": {"cat": "Skid steer / CTL", "fuel": 11, "maint": 11, "ucCost": 4200, "ucLife": 1200, "ucType": "rubber", "price": 109000, "res": 22000}, "Bobcat T770": {"cat": "Skid steer / CTL", "fuel": 12, "maint": 11, "ucCost": 4500, "ucLife": 1200, "ucType": "rubber", "price": 122000, "res": 24500}, "Kubota SVL65-2": {"cat": "Skid steer / CTL", "fuel": 10, "maint": 10, "ucCost": 4000, "ucLife": 1200, "ucType": "rubber", "price": 101000, "res": 20000}, "Kubota SVL75-2": {"cat": "Skid steer / CTL", "fuel": 11, "maint": 10, "ucCost": 4200, "ucLife": 1200, "ucType": "rubber", "price": 109000, "res": 22000}, "Kubota SVL97-2": {"cat": "Skid steer / CTL", "fuel": 12, "maint": 11, "ucCost": 4800, "ucLife": 1200, "ucType": "rubber", "price": 135000, "res": 27000}, "John Deere 333G": {"cat": "Skid steer / CTL", "fuel": 12, "maint": 11, "ucCost": 4800, "ucLife": 1200, "ucType": "rubber", "price": 140000, "res": 28000}, "Caterpillar 906": {"cat": "Wheel loader", "fuel": 7, "maint": 9, "ucCost": 3500, "ucLife": 4000, "ucType": "tyres", "price": 55000, "res": 11000}, "Caterpillar 926M": {"cat": "Wheel loader", "fuel": 13, "maint": 14, "ucCost": 8000, "ucLife": 4000, "ucType": "tyres", "price": 124000, "res": 25000}, "Caterpillar 950GC": {"cat": "Wheel loader", "fuel": 18, "maint": 17, "ucCost": 12000, "ucLife": 4000, "ucType": "tyres", "price": 175000, "res": 35000}, "Caterpillar 966M": {"cat": "Wheel loader", "fuel": 24, "maint": 20, "ucCost": 16000, "ucLife": 4000, "ucType": "tyres", "price": 220000, "res": 44000}, "Caterpillar 980M": {"cat": "Wheel loader", "fuel": 31, "maint": 24, "ucCost": 22000, "ucLife": 4000, "ucType": "tyres", "price": 285000, "res": 57000}, "Komatsu WA270-8": {"cat": "Wheel loader", "fuel": 13, "maint": 14, "ucCost": 8000, "ucLife": 4000, "ucType": "tyres", "price": 123000, "res": 24500}, "Komatsu WA380-8": {"cat": "Wheel loader", "fuel": 17, "maint": 16, "ucCost": 12000, "ucLife": 4000, "ucType": "tyres", "price": 171000, "res": 34000}, "Komatsu WA470-8": {"cat": "Wheel loader", "fuel": 24, "maint": 20, "ucCost": 16000, "ucLife": 4000, "ucType": "tyres", "price": 226000, "res": 45000}, "Volvo L60H": {"cat": "Wheel loader", "fuel": 12, "maint": 13, "ucCost": 8000, "ucLife": 4000, "ucType": "tyres", "price": 106000, "res": 21000}, "Volvo L90H": {"cat": "Wheel loader", "fuel": 15, "maint": 15, "ucCost": 10000, "ucLife": 4000, "ucType": "tyres", "price": 144000, "res": 29000}, "Volvo L120H": {"cat": "Wheel loader", "fuel": 19, "maint": 17, "ucCost": 13000, "ucLife": 4000, "ucType": "tyres", "price": 184000, "res": 37000}, "LiuGong 856H": {"cat": "Wheel loader", "fuel": 18, "maint": 15, "ucCost": 9000, "ucLife": 3500, "ucType": "tyres", "price": 164000, "res": 33000}, "Caterpillar 120": {"cat": "Grader", "fuel": 16, "maint": 16, "ucCost": 9000, "ucLife": 4000, "ucType": "tyres", "price": 216000, "res": 43000}, "Caterpillar 140": {"cat": "Grader", "fuel": 20, "maint": 18, "ucCost": 11000, "ucLife": 4000, "ucType": "tyres", "price": 280000, "res": 56000}, "Caterpillar 160": {"cat": "Grader", "fuel": 22, "maint": 19, "ucCost": 12000, "ucLife": 4000, "ucType": "tyres", "price": 296000, "res": 59000}, "Komatsu GD555-7": {"cat": "Grader", "fuel": 17, "maint": 16, "ucCost": 9500, "ucLife": 4000, "ucType": "tyres", "price": 232000, "res": 46500}, "Komatsu GD655-7": {"cat": "Grader", "fuel": 19, "maint": 17, "ucCost": 10500, "ucLife": 4000, "ucType": "tyres", "price": 264000, "res": 53000}, "John Deere 772GP": {"cat": "Grader", "fuel": 22, "maint": 18, "ucCost": 11000, "ucLife": 4000, "ucType": "tyres", "price": 283000, "res": 56500}, "JCB 3CX": {"cat": "Backhoe", "fuel": 9, "maint": 11, "ucCost": 4500, "ucLife": 4000, "ucType": "tyres", "price": 113000, "res": 22500}, "JCB 4CX": {"cat": "Backhoe", "fuel": 10, "maint": 12, "ucCost": 5000, "ucLife": 4000, "ucType": "tyres", "price": 122000, "res": 24500}, "Caterpillar 432": {"cat": "Backhoe", "fuel": 9, "maint": 11, "ucCost": 4800, "ucLife": 4000, "ucType": "tyres", "price": 120000, "res": 24000}, "Case 580SN": {"cat": "Backhoe", "fuel": 9, "maint": 11, "ucCost": 4800, "ucLife": 4000, "ucType": "tyres", "price": 118000, "res": 23500}, "Caterpillar 725": {"cat": "Articulated truck", "fuel": 25, "maint": 20, "ucCost": 30000, "ucLife": 4000, "ucType": "tyres", "price": 319000, "res": 64000}, "Caterpillar 730": {"cat": "Articulated truck", "fuel": 28, "maint": 22, "ucCost": 32000, "ucLife": 4000, "ucType": "tyres", "price": 323000, "res": 64500}, "Caterpillar 745": {"cat": "Articulated truck", "fuel": 38, "maint": 27, "ucCost": 42000, "ucLife": 4000, "ucType": "tyres", "price": 451000, "res": 90000}, "Volvo A30G": {"cat": "Articulated truck", "fuel": 27, "maint": 21, "ucCost": 31000, "ucLife": 4000, "ucType": "tyres", "price": 320000, "res": 64000}, "Volvo A40G": {"cat": "Articulated truck", "fuel": 36, "maint": 26, "ucCost": 40000, "ucLife": 4000, "ucType": "tyres", "price": 418000, "res": 83500}, "My machine (custom)": {"cat": "Custom", "fuel": 15, "maint": 15, "ucCost": 10000, "ucLife": 3000, "ucType": "steel", "price": 100000, "res": 20000}};
+const COST_LIFE = 4000, GAL = 3.78541;
+const $ = id => document.getElementById(id);
+const fmt = (n,dp=0) => isFinite(n) ? n.toLocaleString("en-US",{minimumFractionDigits:dp,maximumFractionDigits:dp}) : "—";
+const cur = () => $("currency").value;
+const isGal = () => $("fuelUnit").value==="gal";
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const sel=$("machine"), selB=$("machineB");
+(function(){
+  const cats=[...new Set(Object.values(MACHINES).map(m=>m.cat))];
+  [sel,selB].forEach(dd=>{
+    cats.forEach(cat=>{
+      const g=document.createElement("optgroup"); g.label=cat;
+      Object.entries(MACHINES).forEach(([k,m])=>{ if(m.cat===cat) g.appendChild(new Option(k,k)); });
+      dd.appendChild(g);
+    });
+  });
+})();
+sel.value="Rippa R18 PRO"; selB.value="Kubota U17-3";
+
+// region presets: currency, fuel unit, typical fuel price guide
+const REGIONS={AU:["A$","L",1.90],US:["US$","gal",3.60],UK:["£","L",1.45],EU:["€","L",1.65],
+NZ:["NZ$","L",2.05],CA:["C$","L",1.55],ZA:["R","L",22.0],CN:["¥","L",7.60],XX:["$","L",1.50]};
+$("region").addEventListener("change",()=>{
+  const [c,u,f]=REGIONS[$("region").value];
+  $("currency").value=c; $("fuelUnit").value=u; $("fuelPrice").value=f;
+  const m=MACHINES[sel.value];
+  $("fuelBurn").value = u==="gal" ? +(m.fuel/GAL).toFixed(1) : m.fuel;
+  calc();
+});
+$("price").value=MACHINES[sel.value].price;
+
+let opMode="owner";
+let finOn=true;
+document.querySelectorAll(".fbtn").forEach(b=>b.addEventListener("click",()=>{
+  finOn = b.dataset.fin==="yes";
+  document.querySelectorAll(".fbtn").forEach(x=>x.classList.toggle("active",x===b));
+  calc();
+}));
+document.querySelectorAll(".tbtn").forEach(b=>b.addEventListener("click",()=>{
+  opMode=b.dataset.mode;
+  document.querySelectorAll(".tbtn").forEach(x=>x.classList.toggle("active",x===b));
+  $("opRateField").style.display = opMode==="paid"?"block":"none";
+  calc();
+}));
+
+function weeklyRepayment(P,ar,yr){
+  if(P<=0||yr<=0) return 0;
+  const r=ar/100/52, n=yr*52;
+  return r===0 ? P/n : P*r/(1-Math.pow(1+r,-n));
+}
+
+// ── core scenario engine — runs for machine A (user inputs) or any machine (defaults) ──
+function scenario(mKey, overrides={}){
+  const m=MACHINES[mKey];
+  const weekHours=+$("weekHours").value||0, util=+$("utilisation").value;
+  const chargeRate=+$("chargeRate").value||0, fuelPrice=+$("fuelPrice").value||0;
+  const operatorRate = opMode==="paid" ? (+$("operatorRate").value||0) : 0;
+  const useFin=finOn;
+  const deposit=+$("deposit").value||0, rate=+$("rate").value||0, term=+$("term").value||0;
+
+  const price = overrides.price ?? m.price;
+  const machHrs = overrides.hours ?? 0;
+  const ucWear = overrides.ucWear ?? 0;
+  const baseMaint = overrides.maint ?? m.maint;
+  let burn = overrides.burn ?? m.fuel;                 // L/hr basis
+  const burnDisplay = isGal()? +(burn/GAL).toFixed(1) : burn;
+  const fuelPerHr = (isGal()? burn/GAL : burn) * fuelPrice;
+
+  const billable=weekHours*util/100;
+  const revenue=billable*chargeRate;
+  const fuel=weekHours*fuelPerHr;
+  const operator=weekHours*operatorRate;
+  const ageFactor=1+Math.min(machHrs/1000*0.06,0.6);
+  const maint=weekHours*baseMaint*ageFactor;
+  const ucPerHr=m.ucCost>0?m.ucCost/m.ucLife:0;
+  const ucWeekly=ucPerHr*weekHours;
+  const remainingHrs=Math.max(m.ucLife*(1-ucWear/100),1);
+  const costLife = COST_LIFE;
+  const opProfit=revenue-(fuel+operator+maint+ucWeekly);
+  const financed=useFin?price*(1-deposit/100):0;
+  const repay=useFin?weeklyRepayment(financed,rate,term):0;
+  const net=opProfit-repay;
+  const capitalOut=useFin?price*deposit/100:price;
+  const payback=net>0?capitalOut/net:Infinity;
+  const breakEven=chargeRate>0?(fuel+maint+ucWeekly+repay+operator)/chargeRate:0;
+  const margin=revenue>0?net/revenue*100:0;
+  return {m,mKey,price,useFin,weekHours,billable,revenue,fuel,operator,maint,ageFactor,baseMaint,
+    ucPerHr,ucWeekly,remainingHrs,opProfit,financed,repay,net,payback,breakEven,margin,burnDisplay,fuelPrice,chargeRate,operatorRate,costLife};
+}
+
+// ── animated number ──
+let shownNet=0, animId=null;
+function animateNet(target,sym,color){
+  $("netProfit").style.color=color;
+  if(reduceMotion){ shownNet=target; $("netProfit").textContent=sym+fmt(target); return; }
+  cancelAnimationFrame(animId);
+  const from=shownNet, dur=500, t0=performance.now();
+  (function step(t){
+    const p=Math.min((t-t0)/dur,1), e=1-Math.pow(1-p,3);
+    shownNet=from+(target-from)*e;
+    $("netProfit").textContent=sym+fmt(shownNet);
+    if(p<1) animId=requestAnimationFrame(step);
+  })(t0);
+}
+
+// ── week gauge ──
+function drawGauge(s){
+  const bar=$("gaugebar");
+  bar.querySelectorAll(".gaugetick,.gaugeday").forEach(e=>e.remove());
+  const days=["Mon","Tue","Wed","Thu","Fri"];
+  for(let i=0;i<5;i++){
+    if(i>0){ const t=document.createElement("div"); t.className="gaugetick"; t.style.left=(i*20)+"%"; bar.appendChild(t); }
+    const d=document.createElement("div"); d.className="gaugeday"; d.style.left=(i*20+10)+"%"; d.textContent=days[i]; bar.appendChild(d);
+  }
+  const frac=s.weekHours>0?Math.min(s.breakEven/s.weekHours,1):0;
+  $("gaugefill").style.width=(frac*100)+"%";
+  let cap;
+  if(s.net<=0||s.breakEven>s.weekHours){ cap="Doesn't break even inside the working week at these settings."; }
+  else{
+    const perDay=s.weekHours/5, dayIdx=Math.min(Math.floor(s.breakEven/perDay),4);
+    const part=(s.breakEven-dayIdx*perDay)/perDay;
+    const tod=part<0.4?"morning":part<0.7?"midday":"afternoon";
+    cap=`Covered by <b>${days[dayIdx]} ${tod}</b> — everything after that is profit.`;
+  }
+  $("gaugecap").innerHTML=cap;
+}
+
+// ── donut ──
+function drawDonut(s,sym){
+  const cv=$("donut"), ctx=cv.getContext("2d");
+  ctx.clearRect(0,0,360,360);
+  const parts=[
+    ["Fuel",s.fuel,"#FFB000"],
+    ["Operator",s.operator,"#B87333"],
+    ["Servicing",s.maint,"#8A8A8A"],
+    [s.m.ucType==="rubber"?"Tracks":"Undercarriage",s.ucWeekly,"#9AA7B8"],
+    ["Finance",s.repay,"#E8E8E8"],
+    ["Profit",Math.max(s.net,0),"#3FB950"],
+  ].filter(p=>p[1]>0.5);
+  const total=parts.reduce((a,p)=>a+p[1],0)||1;
+  let a=-Math.PI/2;
+  parts.forEach(p=>{
+    const sw=p[1]/total*Math.PI*2;
+    ctx.beginPath(); ctx.arc(180,180,140,a,a+sw); ctx.arc(180,180,86,a+sw,a,true);
+    ctx.closePath(); ctx.fillStyle=p[2]; ctx.fill();
+    a+=sw;
+  });
+  ctx.fillStyle="#F6F8FA"; ctx.textAlign="center";
+  ctx.font="700 15px 'IBM Plex Mono',monospace";
+  ctx.fillText("per week",180,172);
+  ctx.font="700 26px 'IBM Plex Mono',monospace";
+  ctx.fillText(sym+fmt(s.revenue),180,202);
+  $("legend").innerHTML=parts.map(p=>
+    `<div class="leg"><i style="background:${p[2]}"></i>${p[0]}<span class="lv">${sym}${fmt(p[1])}</span></div>`).join("");
+}
+
+// ── compare ──
+function drawCompare(sA,sym){
+  if(!$("useCompare").checked){ $("compareBlock").style.display="none"; return; }
+  $("compareBlock").style.display="block";
+  const sB=scenario(selB.value);
+  const winA=sA.net>=sB.net;
+  const card=(s,win,label)=>`
+    <div class="cmpcard${win?" win":""}">
+      ${win?'<div class="winchip">BETTER EARNER</div>':""}
+      <div class="cmpname">${label}</div>
+      <div class="cmprow">Price <b>${sym}${fmt(s.price)}</b></div>
+      <div class="cmprow">Net / week <b style="color:${s.net>0?"var(--good)":"var(--bad)"}">${sym}${fmt(s.net)}</b></div>
+      <div class="cmprow">Break-even <b>${fmt(s.breakEven,1)} hrs/wk</b></div>
+      <div class="cmprow">${s.useFin?"Weekly repayment":"Capital outlay"} <b>${sym}${fmt(s.useFin?s.repay:s.price)}</b></div>
+    </div>`;
+  $("cmpgrid").innerHTML = card(sA,winA,sA.mKey+" (yours)") + card(sB,!winA,sB.mKey);
+}
+
+// ── main calc & render ──
+let lastScenario=null;
+function calc(){
+  const sym=cur();
+  $("fuelLbl").textContent=sym+"/"+(isGal()?"gal":"L");
+  $("burnLbl").textContent=isGal()?"gal/hr":"L/hr";
+  $("financeBlock").style.display=finOn?"block":"none";
+  const ucWear=+$("ucWear").value;
+  $("ucVal").textContent=ucWear+"% worn";
+  $("ucVal").style.color=ucWear<40?"var(--good)":ucWear<70?"var(--warn)":"var(--bad)";
+
+  // machine A uses live user inputs
+  const burnInput=+$("fuelBurn").value||0;
+  const s=scenario(sel.value,{
+    price:+$("price").value||0,
+    hours:+$("hours").value||0, ucWear,
+    maint:+$("maintRate").value||0,
+    burn: isGal()? burnInput*GAL : burnInput,
+  });
+  lastScenario=s;
+  $("utilVal").textContent = $("utilisation").value+"% = "+fmt(s.billable,1)+" hrs";
+
+  const color=s.net<=0?"var(--bad)":s.margin>25?"var(--good)":"var(--warn)";
+  const text=s.net<=0?"NOT VIABLE AT THESE SETTINGS":s.margin>25?"STRONG EARNER":"VIABLE — TIGHT MARGIN";
+  $("verdictLabel").textContent="● "+text;
+  $("verdictLabel").style.color=color;
+  $("netLabel").textContent="Net profit / week"+(s.useFin?" (after repayments)":"");
+  animateNet(s.net,sym,color);
+  $("annual").textContent=sym+fmt(s.net*48);
+  $("breakeven").textContent=fmt(s.breakEven,1)+" hrs/wk";
+  $("paybackLabel").textContent=s.useFin?"Deposit payback":"Payback";
+  $("payback").textContent=isFinite(s.payback)?fmt(s.payback/4.33,1)+" mths":"—";
+  // whole-of-life
+  const cph = s.weekHours>0 ? (s.fuel+s.operator+s.maint+s.ucWeekly+s.repay)/s.weekHours : 0;
+  const pph = s.weekHours>0 ? s.net/s.weekHours : 0;
+  const lifeWeeks = s.weekHours>0 ? s.costLife/s.weekHours : 0;
+  $("lifeCph").textContent=sym+fmt(cph,2)+"/hr";
+  $("lifePph").textContent=sym+fmt(pph,2)+"/hr";
+  $("lifePph").style.color = pph>0?"var(--good)":"var(--bad)";
+  $("lifeTotal").textContent=sym+fmt(s.net*lifeWeeks);
+  $("lifeYears").textContent=fmt(lifeWeeks/48,1)+" yrs";
+  $("lifeTag").textContent=fmt(s.costLife)+" HRS";
+  $("lifeTotalLbl").textContent="Lifetime profit ("+fmt(s.costLife)+" hrs)";
+  $("lifeYearsLbl").textContent="Years to "+fmt(s.costLife)+" hrs";
+  $("maintNote").textContent=`Age factor ×${s.ageFactor.toFixed(2)} at ${fmt(+$("hours").value||0)} hrs → effective ${sym}${(s.baseMaint*s.ageFactor).toFixed(0)}/hr`;
+  drawGauge(s); drawDonut(s,sym); drawCompare(s,sym);
+
+  // undercarriage detail
+  const m=s.m, weeksToNext=s.weekHours>0?s.remainingHrs/s.weekHours:0;
+  if(m.ucType==="rubber"){
+    $("ucDetail").innerHTML=`<div style="margin-top:8px">
+      <div class="row"><span class="l">Rubber tracks — set of 2</span><span class="v">${sym}${fmt(m.ucCost)}/set (${sym}${fmt(m.ucCost/2)} ea)</span></div>
+      <div class="row"><span class="l">Typical track life</span><span class="v">~${fmt(m.ucLife)} hrs</span></div>
+      <div class="row"><span class="l">Hours to next set</span><span class="v">~${fmt(s.remainingHrs)} hrs (${fmt(weeksToNext)} wks)</span></div>
+    </div>`;
+  } else if(m.ucCost>0){
+    $("ucDetail").innerHTML=`<div style="margin-top:8px">
+      <div class="row"><span class="l">U/C cost per operating hour</span><span class="v">${sym}${fmt(s.ucPerHr,2)}/hr</span></div>
+      <div class="row"><span class="l">Hours to rebuild</span><span class="v">~${fmt(s.remainingHrs)} hrs (${fmt(weeksToNext)} wks)</span></div>
+      <div class="clik"><b>CLIK rebuild quote:</b> ~${sym}${fmt(m.ucCost*0.65)} in CLIK components (3-yr guarantee, ships worldwide) vs ~${sym}${fmt(m.ucCost)} genuine — built into these numbers.</div>
+    </div>`;
+  } else {
+    $("ucDetail").innerHTML=`<div style="margin-top:8px;font-size:13px;color:var(--dim)">No track undercarriage on this machine.</div>`;
+  }
+
+  $("financed").textContent=sym+fmt(s.financed);
+  $("repay").textContent=sym+fmt(s.repay);
+
+  let rows=`
+    <div class="row strong"><span class="l">Revenue — ${fmt(s.billable,1)} billable hrs × ${sym}${s.chargeRate}</span><span class="v">${sym}${fmt(s.revenue)}</span></div>
+    <div class="row"><span class="l">Fuel — ${s.burnDisplay} ${isGal()?"gal":"L"}/hr × ${sym}${s.fuelPrice.toFixed(2)}</span><span class="v">− ${sym}${fmt(s.fuel)}</span></div>
+    <div class="row"><span class="l">${opMode==="paid"?`Operator — ${sym}${s.operatorRate}/hr`:"Operator — you (owner-operator)"}</span><span class="v">− ${sym}${fmt(s.operator)}</span></div>
+    <div class="row"><span class="l">Servicing — ${sym}${s.baseMaint}/hr × ${s.ageFactor.toFixed(2)} age</span><span class="v">− ${sym}${fmt(s.maint)}</span></div>`;
+  if(m.ucCost>0) rows+=`<div class="row"><span class="l">${m.ucType==="rubber"?"Rubber track provision":"Undercarriage provision"}</span><span class="v">− ${sym}${fmt(s.ucWeekly)}</span></div>`;
+  rows+=`<div class="row strong"><span class="l">Operating profit</span><span class="v">${sym}${fmt(s.opProfit)}</span></div>`;
+  if(s.useFin) rows+=`<div class="row"><span class="l">Finance repayment</span><span class="v">− ${sym}${fmt(s.repay)}</span></div>`;
+  rows+=`<div class="row strong"><span class="l">NET PROFIT / WEEK</span><span class="v" style="color:${color}">${sym}${fmt(s.net)}</span></div>`;
+  $("numbers").innerHTML=rows;
+
+  const isRippa=sel.value.startsWith("Rippa");
+  const wty=isRippa?"3-year manufacturer's warranty":"";
+  $("ctaMachine").textContent=`${sel.value} · ${$("year").value} · ${fmt(+$("hours").value)} hrs — ${sym}${fmt(s.price)}${wty?" with "+wty:""}.`;
+}
+
+// ── share card ──
+let shareUrl="", shareName="";
+$("shareBtn").addEventListener("click",()=>{
+  const s=lastScenario; if(!s) return;
+  const sym=cur();
+  const cv=$("shareCanvas"), ctx=cv.getContext("2d");
+  const W=1000,H=1560;
+  ctx.fillStyle="#0D1117"; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="#141414"; ctx.fillRect(0,0,W,150);
+  ctx.fillStyle="#FFB000"; ctx.fillRect(0,150,W,8);
+  ctx.fillStyle="#F6F8FA"; ctx.font="800 52px 'Barlow Condensed',sans-serif";
+  ctx.fillText("EARNER-PRO",50,80);
+  ctx.fillStyle="#9A9A9A"; ctx.font="600 22px 'IBM Plex Mono',monospace";
+  ctx.fillText("MACHINE VIABILITY REPORT · MAKIN TRAKS · "+new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase(),50,120);
+  ctx.fillStyle="#F6F8FA"; ctx.font="700 44px 'Barlow Condensed',sans-serif";
+  ctx.fillText(s.mKey.toUpperCase()+" · "+$("year").value,50,230);
+  ctx.fillStyle="#9AA7B8"; ctx.font="400 24px 'Inter',sans-serif";
+  ctx.fillText(fmt(+$("hours").value)+" hrs · "+sym+fmt(s.price)+" · "+fmt(s.billable,1)+" billable hrs/wk @ "+sym+s.chargeRate+"/hr",50,268);
+  const color=s.net<=0?"#F85149":s.margin>25?"#3FB950":"#FFB000";
+  const text=s.net<=0?"NOT VIABLE AT THESE SETTINGS":s.margin>25?"STRONG EARNER":"VIABLE — TIGHT MARGIN";
+  ctx.fillStyle="#2A3340"; ctx.fillRect(50,300,W-100,300);
+  ctx.fillStyle=color; ctx.fillRect(50,300,10,300);
+  ctx.font="700 24px 'IBM Plex Mono',monospace"; ctx.fillText("● "+text,90,350);
+  ctx.fillStyle="#9AA7B8"; ctx.font="400 22px 'Inter',sans-serif";
+  ctx.fillText("Net profit / week"+(s.useFin?" (after repayments)":""),90,390);
+  ctx.fillStyle=color; ctx.font="700 96px 'IBM Plex Mono',monospace";
+  ctx.fillText(sym+fmt(s.net),90,490);
+  ctx.fillStyle="#9AA7B8"; ctx.font="400 20px 'Inter',sans-serif";
+  ctx.fillText("Annual (48 wks): "+sym+fmt(s.net*48)+"    Break-even: "+fmt(s.breakEven,1)+" hrs/wk    "+(s.useFin?"Deposit payback: ":"Payback: ")+(isFinite(s.payback)?fmt(s.payback/4.33,1)+" mths":"—"),90,560);
+  // breakdown
+  const items=[
+    ["Revenue — "+fmt(s.billable,1)+" hrs × "+sym+s.chargeRate, sym+fmt(s.revenue)],
+    ["Fuel","− "+sym+fmt(s.fuel)],
+    [opMode==="paid"?"Operator":"Operator — you","− "+sym+fmt(s.operator)],
+    ["Servicing (× "+s.ageFactor.toFixed(2)+" age)","− "+sym+fmt(s.maint)],
+    [s.m.ucType==="rubber"?"Rubber tracks":"Undercarriage","− "+sym+fmt(s.ucWeekly)],
+  ];
+  if(s.useFin) items.push(["Finance repayment","− "+sym+fmt(s.repay)]);
+  items.push(["NET PROFIT / WEEK",sym+fmt(s.net)]);
+  let y=680;
+  items.forEach((it,i)=>{
+    const last=i===items.length-1;
+    ctx.fillStyle=last?"#F6F8FA":"#9AA7B8"; ctx.font=(last?"700 ":"400 ")+"26px 'Inter',sans-serif";
+    ctx.fillText(it[0],50,y);
+    ctx.fillStyle=last?color:"#C9D4E0"; ctx.font=(last?"700 ":"600 ")+"28px 'IBM Plex Mono',monospace";
+    ctx.textAlign="right"; ctx.fillText(it[1],W-50,y); ctx.textAlign="left";
+    ctx.strokeStyle="#3A4556"; ctx.setLineDash([2,4]); ctx.beginPath();
+    ctx.moveTo(50,y+14); ctx.lineTo(W-50,y+14); ctx.stroke(); ctx.setLineDash([]);
+    y+=52;
+  });
+  // ── full report: whole-of-life + setup details ──
+  const cph=s.weekHours>0?(s.fuel+s.operator+s.maint+s.ucWeekly+s.repay)/s.weekHours:0;
+  const pph=s.weekHours>0?s.net/s.weekHours:0;
+  const lifeWeeks=s.weekHours>0?s.costLife/s.weekHours:0;
+  y+=8;
+  ctx.fillStyle="#FFB000"; ctx.font="700 26px 'Barlow Condensed',sans-serif";
+  ctx.fillText("WHOLE-OF-LIFE \u00B7 "+fmt(s.costLife)+" HRS",50,y+26); y+=56;
+  const wol=[["All-in cost /hr",sym+fmt(cph,2)],["Profit /hr",sym+fmt(pph,2)],["Lifetime profit",sym+fmt(s.net*lifeWeeks)],["Years to "+fmt(s.costLife)+" hrs",fmt(lifeWeeks/48,1)+" yrs"]];
+  wol.forEach((w2,i)=>{
+    const x=50+i*237;
+    ctx.fillStyle="#9AA7B8"; ctx.font="400 17px 'Inter',sans-serif"; ctx.fillText(w2[0],x,y);
+    ctx.fillStyle="#F6F8FA"; ctx.font="700 26px 'IBM Plex Mono',monospace"; ctx.fillText(w2[1],x,y+32);
+  });
+  y+=76;
+  ctx.fillStyle="#9AA7B8"; ctx.font="400 19px 'Inter',sans-serif";
+  ctx.fillText("Fuel "+s.burnDisplay+(isGal()?" gal":" L")+"/hr @ "+sym+s.fuelPrice.toFixed(2)+" \u00B7 "+s.weekHours+" hr week @ "+$("utilisation").value+"% \u00B7 "+(opMode==="paid"?"paid operator "+sym+s.operatorRate+"/hr":"owner-operator"),50,y); y+=30;
+  if(s.m.ucType==="rubber") ctx.fillText("Rubber tracks: "+sym+fmt(s.m.ucCost)+"/set \u00B7 ~"+fmt(s.m.ucLife)+" hr life \u00B7 next set ~"+fmt(s.remainingHrs)+" hrs",50,y);
+  else if(s.m.ucCost>0) ctx.fillText("Undercarriage: "+sym+fmt(s.ucPerHr,2)+"/hr \u00B7 ~"+fmt(s.remainingHrs)+" hrs to rebuild",50,y);
+  else ctx.fillText("No track undercarriage",50,y);
+  y+=30;
+  ctx.fillText(s.useFin?("Finance: "+(+$("deposit").value)+"% deposit \u00B7 "+(+$("rate").value)+"% p.a. \u00B7 "+(+$("term").value)+" yrs \u00B7 financed "+sym+fmt(s.financed)):"Cash purchase \u2014 no finance",50,y);
+  ctx.fillStyle="#141414"; ctx.fillRect(0,H-130,W,130);
+  ctx.fillStyle="#F6F8FA"; ctx.font="700 30px 'Barlow Condensed',sans-serif";
+  ctx.fillText("RUN YOUR OWN NUMBERS — EARNER-PRO BY MAKIN TRAKS",50,H-78);
+  ctx.fillStyle="#9A9A9A"; ctx.font="600 20px 'IBM Plex Mono',monospace";
+  ctx.fillText("+61 402 940 490 · mkntraks@gmail.com",50,H-40);
+  const url=cv.toDataURL("image/png");
+  let ov=document.getElementById("shareOverlay");
+  if(!ov){
+    ov=document.createElement("div"); ov.id="shareOverlay";
+    ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:99;display:none;flex-direction:column;align-items:center;justify-content:center;padding:18px;gap:12px";
+    ov.addEventListener("click",e=>{ if(e.target===ov) ov.style.display="none"; });
+    const im=document.createElement("img"); im.id="shareImg";
+    im.style.cssText="max-width:92%;max-height:68%;border:1px solid #3A3A3A;border-radius:8px";
+    const cap=document.createElement("div");
+    cap.style.cssText="color:#9AA7B8;font-size:13px;text-align:center;max-width:320px";
+    cap.textContent="Share opens your phone\u2019s options \u2014 Email, Messages, WhatsApp, AirDrop. Or press and hold the image to save it.";
+    const btns=document.createElement("div"); btns.style.cssText="display:flex;gap:10px";
+    const dl=document.createElement("a"); dl.id="shareDl"; dl.className="btn ghost"; dl.textContent="Download";
+    const cl=document.createElement("button"); cl.type="button"; cl.className="btn ghost"; cl.textContent="Close";
+    cl.addEventListener("click",()=>ov.style.display="none");
+    const sh=document.createElement("button"); sh.type="button"; sh.className="btn"; sh.textContent="Share";
+    sh.addEventListener("click",async()=>{
+      try{
+        const blob=await (await fetch(shareUrl)).blob();
+        const file=new File([blob],shareName,{type:"image/png"});
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          await navigator.share({files:[file],title:"Earner-Pro Report"});
+        } else if(navigator.share){
+          await navigator.share({title:"Earner-Pro Report",text:"My Earner-Pro machine viability report"});
+        } else {
+          cap.textContent="Sharing isn't supported in this browser \u2014 use Download, or press and hold the image.";
+        }
+      }catch(e){}
+    });
+    btns.appendChild(sh); btns.appendChild(dl); btns.appendChild(cl);
+    ov.appendChild(im); ov.appendChild(cap); ov.appendChild(btns);
+    document.body.appendChild(ov);
+  }
+  document.getElementById("shareImg").src=url;
+  const dl=document.getElementById("shareDl");
+  shareName="earner-pro-report-"+s.mKey.replace(/\s+/g,"-").toLowerCase()+".png";
+  shareUrl=url;
+  dl.href=url; dl.download=shareName;
+  ov.style.display="flex";
+});
+
+sel.addEventListener("change",()=>{
+  const m=MACHINES[sel.value];
+  $("price").value=m.price; $("maintRate").value=m.maint;
+  $("fuelBurn").value=isGal()? +(m.fuel/GAL).toFixed(1) : m.fuel;
+  calc();
+});
+$("fuelUnit").addEventListener("change",()=>{
+  const b=+$("fuelBurn").value||0;
+  $("fuelBurn").value=isGal()? +(b/GAL).toFixed(1) : +(b*GAL).toFixed(1);
+  calc();
+});
+$("useCompare").addEventListener("change",calc);
+selB.addEventListener("change",calc);
+document.querySelectorAll("input,select").forEach(i=>{
+  if(!["fuelUnit","useCompare","machineB"].includes(i.id)) i.addEventListener("input",calc);
+});
+calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Earner-Pro — Machine Viability by Makin Traks",
+  "short_name": "Earner-Pro",
+  "description": "Is this machine a worthwhile earner? Net profit per week, annual and break-even hours for 107 machines.",
+  "start_url": "./?src=home-screen",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

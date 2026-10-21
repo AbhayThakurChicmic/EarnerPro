@@ -660,6 +660,37 @@ document.querySelectorAll("input,select").forEach(i=>{
   if(!["fuelUnit","useCompare","machineB"].includes(i.id)) i.addEventListener("input",calc);
 });
 
+// ── pre-load from listing links: ?machine=&price=&hours=&wear=&year=&rate=&src= (all optional) ──
+const PARAMS=new URLSearchParams(location.search);
+const PREFILL={machine:PARAMS.get("machine")||"", matched:false};
+const SOURCE=(()=>{
+  const src=PARAMS.get("src"); if(src) return src.slice(0,300);
+  try{ const r=new URL(document.referrer); return r.origin===location.origin ? r.pathname : r.href; }catch(e){ return "direct"; }
+})();
+function findMachine(name){
+  if(!name) return null;
+  if(MACHINES[name]) return name;
+  const norm=s=>s.toLowerCase().replace(/[^a-z0-9]/g,"");
+  return Object.keys(MACHINES).find(k=>norm(k)===norm(name)) || null;
+}
+function numParam(key,min,max){
+  const raw=PARAMS.get(key); if(raw===null||raw.trim()==="") return null;
+  const n=+raw.replace(/[, $]/g,"");
+  return isFinite(n)&&n>=min&&n<=max ? n : null;
+}
+function applyUrlParams(){
+  const key=findMachine(PREFILL.machine);
+  if(key){ sel.value=key; applyMachineDefaults(); PREFILL.matched=true; }
+  const price=numParam("price",1,1e8), hours=numParam("hours",0,200000),
+        wear=numParam("wear",0,100), year=numParam("year",1950,new Date().getFullYear()+1),
+        rate=numParam("rate",0,30);
+  if(price!==null) $("price").value=Math.round(price);
+  if(hours!==null) $("hours").value=Math.round(hours);
+  if(wear!==null) $("ucWear").value=Math.round(wear);
+  if(year!==null) $("year").value=Math.round(year);
+  if(rate!==null) $("rate").value=rate;   // finance interest rate, % p.a.
+}
+
 // ── boot: machine DB is served separately so it can be updated without redeploying ──
 async function boot(){
   $("verdictLabel").textContent="● LOADING MACHINE DATA…";
@@ -677,6 +708,7 @@ async function boot(){
   if(!MACHINES[sel.value]) sel.selectedIndex=0;
   if(!MACHINES[selB.value]) selB.selectedIndex=0;
   applyMachineDefaults();
+  applyUrlParams();
   calc();
 }
 boot();

@@ -2,7 +2,13 @@
 
 For the backend / server team picking up Stage 1. It covers what the tool is, what the frontend now does, and exactly what is left to build on the server side.
 
-Status as of **21 Oct 2026**. Frontend work is on branch `feat/frontend-changes`; `main` holds the client's original V3.1 file.
+**Read [PROJECT-CONTEXT.md](PROJECT-CONTEXT.md) first.** It covers the client, the full brief, the live-site audit, the data gap and overall status. This file is the technical companion.
+
+Status as of **21 Oct 2026**. All frontend work is on branch `feat/frontend-changes` (clone this one); `main` holds the client's original V3.1 file.
+
+```
+git clone -b feat/frontend-changes https://github.com/AbhayThakurChicmic/EarnerPro.git
+```
 
 ---
 
@@ -25,6 +31,7 @@ Client contact: Daz Scale, Makin Traks — mkntraks@gmail.com.
 | `manifest.webmanifest` | PWA manifest (name, icons, standalone display). |
 | `sw.js` | Service worker (offline/fast reopen). |
 | `icons/` | `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`. **Placeholders** until the client supplies a logo. |
+| `PROJECT-CONTEXT.md`, `HANDOFF.md` | Project docs. **Don't upload these to the web server.** |
 
 All paths inside the page are **relative**, so the folder can be served from any sub-path.
 
@@ -144,9 +151,21 @@ The example above is the client's own test case: with the default inputs, the nu
 
 To see the params in reports, register `source_listing`, `machine` and `verdict` as **event-scoped custom dimensions** in GA4 Admin. Mark `report_unlock` as a key event. The client wants weekly totals, not dashboards.
 
+### Frontend: still pending (each blocked on an input)
+
+| Item | Blocked on | Work when it arrives |
+|---|---|---|
+| Lead sending | B3 endpoint URL | Set `LEAD_ENDPOINT`, then send a test lead |
+| Analytics | GA4 Measurement ID (client) | Set `GA_ID`, then check events in GA4 DebugView |
+| App icon | Client logo | Replace the 3 PNGs in `icons/` (192, 512, 180 px; keep the important content in the middle 80% for maskable) and bump `CACHE` in `sw.js` |
+| F7 toggle bug | Client approval | One-line fix (§10) |
+| Client decisions (§10) | Client answers | Small tweaks, only if the answers differ from what's built |
+| Final QA | Site live on HTTPS | Share with the image and Add to Home Screen, on iPhone and Android |
+| *Optional:* Share image fonts | Nothing | Wait for `document.fonts.ready` before drawing the share canvas |
+
 ---
 
-## 9. Backend / server tasks — pending
+## 9. Backend / server tasks — pending (not started)
 
 ### B1. HTTPS on the whole site
 The live site currently answers on plain `http://` without redirecting. Web Share and the PWA install need HTTPS.
@@ -155,7 +174,7 @@ The live site currently answers on plain `http://` without redirecting. Web Shar
 
 ### B2. Host the tool at `/earner-pro/`
 - **Domain:** to be confirmed with the client. The brief says `makintraks.com.au`, which doesn't resolve. The live site is `makintraks.com`.
-- **Upload:** the repo files (not `HANDOFF.md`) into a real `/earner-pro/` directory. The site runs WordPress on Apache, and WordPress's default rewrite skips real directories (`RewriteCond %{REQUEST_FILENAME} !-d`), so a real folder is served directly.
+- **Upload:** `index.html`, `machines.json`, `manifest.webmanifest`, `sw.js` and `icons/` into a real `/earner-pro/` directory. Leave out the `.md` files and `.gitignore`. The site runs WordPress on Apache, and WordPress's default rewrite skips real directories (`RewriteCond %{REQUEST_FILENAME} !-d`), so a real folder is served directly.
 - **Trailing slash:** check that `/earner-pro?…` redirects to `/earner-pro/?…` with the query string kept. `mod_dir` does this by default.
 - **Headers:**
   - `sw.js` and `machines.json`: `Cache-Control: no-cache`

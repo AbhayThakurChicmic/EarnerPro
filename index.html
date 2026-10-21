@@ -92,6 +92,15 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
 .sliderhead .val{font-family:'IBM Plex Mono',monospace;font-weight:700}
 .clik{margin-top:10px;padding:10px 12px;background:var(--jet);border:1px solid var(--amber);border-radius:6px;font-size:13px}
 .clik b{color:var(--amber)}
+/* lead gate */
+.gate{display:flex;flex-direction:column;gap:10px}
+.gatehead{font-size:14px;color:var(--bone)}
+.gate input{width:100%;background:var(--jet);border:1px solid var(--line);border-radius:6px;color:var(--bone);font-family:'IBM Plex Mono',monospace;font-size:16px;padding:9px 10px;outline:none}
+.gate input:focus{border-color:var(--amber)}
+.gate input[aria-invalid=true]{border-color:var(--bad)}
+.gate .btn{width:100%}
+.gateerr{font-size:12.5px;color:var(--bad);min-height:0}
+.gateerr:empty{display:none}
 @media(max-width:520px){.cmpgrid{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -237,9 +246,22 @@ input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;bac
   <!-- WEEKLY NUMBERS -->
   <div class="card">
     <h2>Weekly numbers</h2>
-    <div id="numbers"></div>
-    <div style="text-align:center;margin-top:14px">
-      <button class="btn ghost" id="shareBtn">Share / save my report</button>
+    <form id="leadGate" class="gate" novalidate style="display:none">
+      <div class="gatehead">Unlock the full weekly breakdown and your shareable report.</div>
+      <div class="grid2">
+        <label class="f span2"><div class="lbl">Email <b>required</b></div><input type="email" id="leadEmail" autocomplete="email" inputmode="email" required></label>
+        <label class="f"><div class="lbl">Name</div><input type="text" id="leadName" autocomplete="name"></label>
+        <label class="f"><div class="lbl">Mobile</div><input type="tel" id="leadMobile" autocomplete="tel" inputmode="tel"></label>
+      </div>
+      <div class="gateerr" id="leadErr" role="alert"></div>
+      <button class="btn" type="submit" id="leadSubmit">Unlock full report</button>
+      <div class="hint">Used by Makin Traks to contact you about your report.</div>
+    </form>
+    <div id="reportBody" style="display:none">
+      <div id="numbers"></div>
+      <div style="text-align:center;margin-top:14px">
+        <button class="btn ghost" id="shareBtn">Share / save my report</button>
+      </div>
     </div>
   </div>
 
@@ -657,7 +679,7 @@ $("fuelUnit").addEventListener("change",()=>{
 $("useCompare").addEventListener("change",calc);
 selB.addEventListener("change",calc);
 document.querySelectorAll("input,select").forEach(i=>{
-  if(!["fuelUnit","useCompare","machineB"].includes(i.id)) i.addEventListener("input",calc);
+  if(!["fuelUnit","useCompare","machineB"].includes(i.id) && !i.closest("#leadGate")) i.addEventListener("input",calc);
 });
 
 // ── pre-load from listing links: ?machine=&price=&hours=&wear=&year=&rate=&src= (all optional) ──
@@ -691,6 +713,111 @@ function applyUrlParams(){
   if(rate!==null) $("rate").value=rate;   // finance interest rate, % p.a.
 }
 
+// ── lead capture: email gate on the weekly breakdown; verdict plate stays visible ──
+const LEAD_ENDPOINT="";   // Google Apps Script web-app URL — set once the endpoint is deployed
+const UNLOCK_KEY="ep_unlocked_v1", QUEUE_KEY="ep_lead_queue_v1";
+const store={
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} },
+};
+const isUnlocked=()=>!!store.get(UNLOCK_KEY);
+function setLocked(locked){
+  $("leadGate").style.display=locked?"flex":"none";
+  $("reportBody").style.display=locked?"none":"block";
+}
+
+// "18 Oct 2026 2:14pm", Makin Traks local time (Queensland, no daylight saving)
+function brisbaneStamp(d){
+  const p={};
+  new Intl.DateTimeFormat("en-AU",{timeZone:"Australia/Brisbane",day:"numeric",month:"short",year:"numeric",
+    hour:"numeric",minute:"2-digit",hour12:true}).formatToParts(d).forEach(x=>p[x.type]=x.value);
+  return `${p.day} ${p.month.replace(".","")} ${p.year} ${p.hour}:${p.minute}${(p.dayPeriod||"").toLowerCase().replace(/\./g,"")}`;
+}
+
+function buildLead(contact){
+  const s=lastScenario, sym=cur(), now=new Date();
+  const r2=n=>isFinite(n)?Math.round(n*100)/100:null;
+  const verdict=$("verdictLabel").textContent.replace(/^●\s*/,"");
+  const hours=+$("hours").value||0, ucWear=+$("ucWear").value, util=+$("utilisation").value;
+  const deposit=+$("deposit").value||0, rate=+$("rate").value||0, term=+$("term").value||0;
+  const cph=s.weekHours>0?(s.fuel+s.operator+s.maint+s.ucWeekly+s.repay)/s.weekHours:0;
+  const lifeWeeks=s.weekHours>0?s.costLife/s.weekHours:0;
+  const fuelUnit=isGal()?"gal":"L";
+
+  const subject=`NEW EARNER-PRO LEAD - ${s.mKey}`;
+  const body=[
+    `${brisbaneStamp(now)} | ${contact.email} | ${contact.mobile||"-"} | ${contact.name||"-"}`,
+    `Machine: ${s.mKey} | price ${sym}${fmt(s.price)} | ${fmt(hours)} hrs | wear ${ucWear}%`,
+    `Inputs: ${sym}${s.chargeRate}/hr | ${s.weekHours}hr wk @ ${util}% | diesel ${sym}${s.fuelPrice.toFixed(2)}/${fuelUnit} | ${opMode==="paid"?`paid operator ${sym}${s.operatorRate}/hr`:"owner-operator"}`,
+    s.useFin?`Finance: ${deposit}% deposit | ${rate}% p.a. | ${term} yrs | repayment ${sym}${fmt(s.repay)}/wk`:"Finance: cash buyer",
+    `RESULT: ${verdict} | Net ${sym}${fmt(s.net)}/wk | annual ${sym}${fmt(s.net*48)} | break-even ${fmt(s.breakEven,1)} hrs`,
+    `Source: ${SOURCE}`,
+  ].join("\n");
+
+  let compare=null;
+  if($("useCompare").checked){
+    const b=scenario(selB.value);
+    compare={machine:b.mKey,price:r2(b.price),net_week:r2(b.net),break_even_hrs:r2(b.breakEven),repayment_week:r2(b.repay)};
+  }
+  return {
+    type:"earner-pro-lead", app_version:"V3.1",
+    submitted_at:now.toISOString(), submitted_at_local:brisbaneStamp(now),
+    lead:contact, source:SOURCE, page_url:location.href,
+    prefill:{machine_requested:PREFILL.machine,matched:PREFILL.matched},
+    inputs:{
+      machine:s.mKey, category:s.m.cat, year:+$("year").value||null, hours, price:r2(s.price), uc_wear_pct:ucWear,
+      region:$("region").value, currency:sym, fuel_unit:fuelUnit, fuel_price:r2(s.fuelPrice), fuel_burn_per_hr:s.burnDisplay,
+      charge_rate:s.chargeRate, week_hours:s.weekHours, utilisation_pct:util,
+      operator_mode:opMode==="paid"?"paid":"owner", operator_rate:opMode==="paid"?s.operatorRate:0,
+      servicing_rate_base:s.baseMaint, finance:s.useFin,
+      deposit_pct:s.useFin?deposit:null, interest_rate_pct:s.useFin?rate:null, term_yrs:s.useFin?term:null,
+    },
+    results:{
+      verdict, net_week:r2(s.net), annual:r2(s.net*48), break_even_hrs:r2(s.breakEven),
+      payback_months:isFinite(s.payback)?r2(s.payback/4.33):null, margin_pct:r2(s.margin),
+      revenue_week:r2(s.revenue), billable_hrs_week:r2(s.billable), fuel_week:r2(s.fuel), operator_week:r2(s.operator),
+      servicing_week:r2(s.maint), age_factor:r2(s.ageFactor), undercarriage_week:r2(s.ucWeekly),
+      uc_hours_remaining:Math.round(s.remainingHrs), operating_profit_week:r2(s.opProfit),
+      amount_financed:r2(s.financed), repayment_week:r2(s.repay),
+      cost_per_hr:r2(cph), profit_per_hr:r2(s.weekHours>0?s.net/s.weekHours:0),
+      lifetime_profit:r2(s.net*lifeWeeks), years_to_life:r2(lifeWeeks/48), life_hrs:s.costLife,
+    },
+    compare,
+    email:{to:"mkntraks@gmail.com",subject,body},
+  };
+}
+
+// Leads are queued on the device until the POST goes out, so a dropped 4G connection doesn't lose one.
+async function flushLeads(){
+  const queue=store.get(QUEUE_KEY)||[];
+  if(!queue.length) return;
+  if(!LEAD_ENDPOINT){ console.warn("Earner-Pro: LEAD_ENDPOINT not set — lead not sent", queue); store.set(QUEUE_KEY,[]); return; }
+  const left=[];
+  for(const lead of queue){
+    try{
+      // text/plain + no-cors avoids a CORS preflight, which Apps Script web apps don't answer
+      await fetch(LEAD_ENDPOINT,{method:"POST",mode:"no-cors",keepalive:true,
+        headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(lead)});
+    }catch(e){ left.push(lead); }
+  }
+  store.set(QUEUE_KEY,left);
+}
+
+$("leadGate").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(!lastScenario) return;
+  const email=$("leadEmail").value.trim();
+  const ok=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  $("leadEmail").setAttribute("aria-invalid",ok?"false":"true");
+  $("leadErr").textContent=ok?"":"Enter a valid email address to unlock your report.";
+  if(!ok){ $("leadEmail").focus(); return; }
+  const lead=buildLead({email,name:$("leadName").value.trim(),mobile:$("leadMobile").value.trim()});
+  store.set(QUEUE_KEY,[...(store.get(QUEUE_KEY)||[]),lead]);
+  store.set(UNLOCK_KEY,{email,at:lead.submitted_at});
+  setLocked(false);
+  flushLeads();
+});
+
 // ── boot: machine DB is served separately so it can be updated without redeploying ──
 async function boot(){
   $("verdictLabel").textContent="● LOADING MACHINE DATA…";
@@ -710,8 +837,10 @@ async function boot(){
   applyMachineDefaults();
   applyUrlParams();
   calc();
+  setLocked(!isUnlocked());
 }
 boot();
+flushLeads();
 </script>
 </body>
 </html>

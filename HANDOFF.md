@@ -6,7 +6,7 @@ For the backend / server team picking up Stage 1. It covers what the tool is, wh
 
 Status as of **29 Oct 2026**. All frontend work is on branch `feat/frontend-changes` (clone this one); `main` holds the client's original V3.1 file.
 
-**Staging:** the tool is deployed at **https://makintrak.projectlabs.in/earner-pro/**. That staging site is a rebuild of the client's site on the Plazart theme + Advanced Product plugin (listings at `/ap-product/<slug>/`). It is not the WooCommerce setup described in the live-site audit. Everything in §9 marked "staging" refers to it. The client status report (29 Oct) is a shared claude.ai doc: ask Abhay.
+**Staging:** the tool is deployed at **https://makintrak.projectlabs.in/earner-pro/**. That staging site is a rebuild of the client's site on the Plazart theme + Advanced Product plugin (listings at `/ap-product/<slug>/`). It is not the WooCommerce setup described in the live-site audit. Everything in §9 marked "staging" refers to it. **Staging is expected to replace the live site** (Abhay, 29 Oct; not yet confirmed by the client), so all WordPress work targets staging. See "Go-live: staging → live" in §9. The client status report (29 Oct) is a shared claude.ai doc: ask Abhay.
 
 ```
 git clone -b feat/frontend-changes https://github.com/AbhayThakurChicmic/EarnerPro.git
@@ -183,6 +183,15 @@ To see the params in reports, register `source_listing`, `machine` and `verdict`
 | B6 | Rippa pages | Button **done**; only RL06 pre-loads a machine |
 | B7 | Machine data updates | Process not agreed yet |
 
+### Go-live: staging → live
+When the staging build is pushed to the live domain:
+- **The `/earner-pro/` folder doesn't travel with WordPress.** Migration plugins (All-in-One WP Migration, Duplicator and similar) copy the database and `wp-content/` only, and the tool lives outside both. Upload it to the live root separately (§2 "To deploy the tool").
+- **Moves with the database:** the WPCode snippet, the menu item, the homepage banner. The snippet builds links from `home_url()` and reads `ABSPATH . 'earner-pro/machines.json'`, so it needs no change for the new domain.
+- **Keep links relative** (`/earner-pro/?src=…`) in menus and Elementor. A hard-coded `makintrak.projectlabs.in` link would keep pointing at staging after the move.
+- **HTTPS** (B1) must be set up on the live domain itself. The live site has no Cloudflare in front, so it's done in the host's panel or with a plugin there.
+- **After the move, check:** the live footer reads `EARNER-PRO V3.1`, a listing button opens the tool on the live domain, and a test lead arrives.
+- **Old live URLs:** the live site's WooCommerce listings (`/product/<slug>/`) become `/ap-product/<slug>/`. Redirects for old links and search results are outside Earner-Pro, but worth raising with whoever runs the migration.
+
 ### B1. HTTPS on the whole site
 The live site and staging both answer on plain `http://` without redirecting. Web Share and the PWA install need HTTPS. Staging is behind Cloudflare, so **SSL/TLS → Edge Certificates → Always Use HTTPS** is the simplest switch.
 - Make sure the certificate covers `www` and the bare domain.
@@ -293,7 +302,7 @@ Points to handle:
 | 10 | Are staging's Rippa R18 / RS06 the same as the tool's R18 PRO / RS06 PRO? | Not mapped (B6) |
 | 11 | Who corrects the listing data (Make on all used listings, Model on Stock 030/033, the D6N sweep's category)? | The snippet works around it |
 | 12 | OK to keep the menu changes (Home removed, Hire merged)? | Changed on staging |
-| 13 | Does the staging rebuild replace the live site, or do the changes need porting to the live WooCommerce setup? | The snippet only works on the Advanced Product build |
+| 13 | Does the staging rebuild replace the live site? | Assumed yes (Abhay, 29 Oct); confirm with the client. The snippet only works on the Advanced Product build |
 
 **Known V3.1 bug (awaiting client approval):**
 - **Where:** the operator-mode click handler binds to every `.tbtn`, and the Finance/Cash buttons share that class.

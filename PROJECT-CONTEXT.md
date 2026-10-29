@@ -13,7 +13,7 @@ Last updated **29 Oct 2026**.
 | Backend / server (B1–B7) | **In progress on staging** (https://makintrak.projectlabs.in): tool hosted, menu item and listing buttons live; HTTPS redirect, homepage banner and lead endpoint still to do. Per-task table in HANDOFF §9 |
 | Client inputs | Outstanding. Status report with 11 questions sent 29 Oct. See "Needed from the client" |
 
-**Staging is a rebuild, not a copy of the live site.** It runs the Plazart theme with the Advanced Product plugin (listings at `/ap-product/<slug>/`), whereas the audit below describes the live WooCommerce site. Still to confirm: whether staging replaces the live site (HANDOFF §10, question 13).
+**Staging is a rebuild, not a copy of the live site.** It runs the Plazart theme with the Advanced Product plugin (listings at `/ap-product/<slug>/`), whereas the audit below describes the live WooCommerce site. **Staging is expected to replace the live site** (Abhay, 29 Oct; client to confirm), so all WordPress work is done on staging. At go-live the `/earner-pro/` folder has to be uploaded to the live root separately, because site migrations don't carry it (HANDOFF §9 "Go-live: staging → live").
 
 **Listing-match finding (29 Oct):** only 29 of the staging site's 139 listings name a model that is in the 107-machine database. The rest open on the default R18 PRO. The client has been asked to approve a "pick the closest model" prompt and a closest-model list. Details in HANDOFF §9 B4.
 

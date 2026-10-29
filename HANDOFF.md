@@ -4,7 +4,9 @@ For the backend / server team picking up Stage 1. It covers what the tool is, wh
 
 **Read [PROJECT-CONTEXT.md](PROJECT-CONTEXT.md) first.** It covers the client, the full brief, the live-site audit, the data gap and overall status. This file is the technical companion.
 
-Status as of **21 Oct 2026**. All frontend work is on branch `feat/frontend-changes` (clone this one); `main` holds the client's original V3.1 file.
+Status as of **29 Oct 2026**. All frontend work is on branch `feat/frontend-changes` (clone this one); `main` holds the client's original V3.1 file.
+
+**Staging:** the tool is deployed at **https://makintrak.projectlabs.in/earner-pro/**. That staging site is a rebuild of the client's site on the Plazart theme + Advanced Product plugin (listings at `/ap-product/<slug>/`). It is not the WooCommerce setup described in the live-site audit. Everything in §9 marked "staging" refers to it. The client status report (29 Oct) is a shared claude.ai doc: ask Abhay.
 
 ```
 git clone -b feat/frontend-changes https://github.com/AbhayThakurChicmic/EarnerPro.git
@@ -31,7 +33,11 @@ Client contact: Daz Scale, Makin Traks — mkntraks@gmail.com.
 | `manifest.webmanifest` | PWA manifest (name, icons, standalone display). |
 | `sw.js` | Service worker (offline/fast reopen). |
 | `icons/` | `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`. **Placeholders** until the client supplies a logo. |
+| `.htaccess` | Cache headers, manifest type, gzip, no folder listing; 404s repo-only files. Uploaded with the tool. If the server answers 500 after upload, delete it: the tool works without it. |
+| `wordpress/earner-pro-listing-button.php` | The listing-button code installed on staging as a WPCode snippet (§9 B4). **Not uploaded with the tool.** |
 | `PROJECT-CONTEXT.md`, `HANDOFF.md` | Project docs. **Don't upload these to the web server.** |
+
+**To deploy the tool:** upload `index.html`, `machines.json`, `manifest.webmanifest`, `sw.js`, `.htaccess` and `icons/` into `<site root>/earner-pro/`. Nothing else.
 
 All paths inside the page are **relative**, so the folder can be served from any sub-path.
 
@@ -165,22 +171,33 @@ To see the params in reports, register `source_listing`, `machine` and `verdict`
 
 ---
 
-## 9. Backend / server tasks — pending (not started)
+## 9. Backend / server tasks
+
+| # | Task | Staging (makintrak.projectlabs.in), 29 Oct |
+|---|---|---|
+| B1 | HTTPS redirect | **Not done**: http still answers 200 without redirecting |
+| B2 | Host at `/earner-pro/` | **Done** |
+| B3 | Lead endpoint | **Blocked**: needs the client's Google account |
+| B4 | Listing button | **Done** (WPCode snippet); machine fills in for exact matches only |
+| B5 | Menu + homepage banner | Menu item **done**; banner **not done** |
+| B6 | Rippa pages | Button **done**; only RL06 pre-loads a machine |
+| B7 | Machine data updates | Process not agreed yet |
 
 ### B1. HTTPS on the whole site
-The live site currently answers on plain `http://` without redirecting. Web Share and the PWA install need HTTPS.
+The live site and staging both answer on plain `http://` without redirecting. Web Share and the PWA install need HTTPS. Staging is behind Cloudflare, so **SSL/TLS → Edge Certificates → Always Use HTTPS** is the simplest switch.
 - Make sure the certificate covers `www` and the bare domain.
 - 301-redirect all http → https.
 
 ### B2. Host the tool at `/earner-pro/`
 - **Domain:** to be confirmed with the client. The brief says `makintraks.com.au`, which doesn't resolve. The live site is `makintraks.com`.
-- **Upload:** `index.html`, `machines.json`, `manifest.webmanifest`, `sw.js` and `icons/` into a real `/earner-pro/` directory. Leave out the `.md` files and `.gitignore`. The site runs WordPress on Apache, and WordPress's default rewrite skips real directories (`RewriteCond %{REQUEST_FILENAME} !-d`), so a real folder is served directly.
+- **Upload:** the files listed under "To deploy the tool" in §2 into a real `/earner-pro/` directory in the WordPress root (the folder with `wp-config.php`). WordPress's default rewrite skips real directories (`RewriteCond %{REQUEST_FILENAME} !-d`), so a real folder is served directly, without the theme. Use cPanel's File Manager or SFTP, not the "WP File Manager" plugin, which has a history of serious vulnerabilities.
 - **Trailing slash:** check that `/earner-pro?…` redirects to `/earner-pro/?…` with the query string kept. `mod_dir` does this by default.
-- **Headers:**
-  - `sw.js` and `machines.json`: `Cache-Control: no-cache`
+- **Headers:** set by the repo's `.htaccess`:
+  - `index.html`, `sw.js` and `machines.json`: `Cache-Control: no-cache`
   - `manifest.webmanifest`: `Content-Type: application/manifest+json`
-  - icons: can be long-cached
+  - icons: cached for 30 days
   - gzip/deflate for `.html`, `.json`, `.js`
+- **Caches:** exclude `/earner-pro/` from any page-cache plugin, and purge Cloudflare after re-uploading a file.
 - **Check:** the footer of the live page reads `EARNER-PRO V3.1`.
 
 ### B3. Lead endpoint (Google Apps Script + Google Sheet)
@@ -220,27 +237,35 @@ Points to handle:
 - **Test case:** submit a test lead from the R18 PRO defaults and check that the email matches §6 exactly and arrives within a minute.
 
 ### B4. "Check this machine's viability" button on every listing
-- The listings are WooCommerce products (`/product/<slug>/`) sharing **one single-product template**, so this is one template edit or hook, e.g. `woocommerce_single_product_summary`.
-- Build the link from the product data (see §5):
+**Built on staging** as the WPCode snippet in [wordpress/earner-pro-listing-button.php](wordpress/earner-pro-listing-button.php) (WPCode → Code Snippets: PHP Snippet, Auto Insert, Frontend Only). The repo file is the source of truth: change it there, then paste it into WPCode. If the snippet ever breaks the admin, `/wp-admin/?wpcode-safe-mode=1` loads with all snippets off.
+
+- **Where it hooks:** staging listings are Advanced Product posts (`ap_product`, `/ap-product/<slug>/`), not WooCommerce products. The theme doesn't render them through `the_content`, so the snippet hooks `wp_footer` and a small script inserts the button:
+  - used listings: under the "Call our seller" box (`.ap-templaza-sidebar .call-to-buy`, present twice: mobile and desktop sidebars), styled like the theme's "ENQUIRY NOW!" button
+  - Rippa pages (separate `rippa-theme` template): in `.rippa-action-bar`, using its own `rippa-btn rippa-btn-outline` classes
+- **Skipped:** the attachment and forklift categories, plus any title containing sweep/screen/rake/pusher/mulcher/ripper (one attachment is filed under the D6N machine category).
 
 | Param | Source | Reliability |
 |---|---|---|
-| `price` | `$product->get_price()` | Reliable |
-| `year` | Leading 4 digits of the title (`/^(19|20)\d{2}\b/`) | Usually reliable |
-| `hours` | Only free text in titles today | Fragile. A product meta field is better, if the client agrees |
-| `wear` | Not published anywhere | Omit unless the client adds a field |
-| `machine` | Needs a **mapping** from product to a `machines.json` key. Suggested: a product meta field such as `earner_pro_machine` | Omit when there's no mapping |
-| `src` | The product's path, e.g. `/product/rippa-r18-pro/` | Reliable |
+| `price` | Post meta `ap_price` | Reliable for used listings; Rippa pages have none, so the tool's guide price is used |
+| `hours` | Post meta `hours` | Reliable; Rippa pages have none (new stock, 0 is right) |
+| `year` | Leading year of the title (after an optional "New") | Reliable |
+| `wear` | Not published anywhere | Omitted |
+| `machine` | Leading words of the title, with CAT/JD expanded, matched against `machines.json` keys on whole words; plus a small alias list | **29 listings pre-load a machine** (29 Oct crawl of all 139: 117 on the standard template, attachments included, and 22 Rippa). Unmatched listings send no `machine` |
+| `src` | The listing's path, e.g. `/ap-product/rippa-rl06/` | Reliable |
 
-- URL-encode every value. Hide the button for products that aren't machines (attachments, parts).
+- **Why the title, not the Make/Model fields:** Make is "Caterpiller" on every used listing, including John Deere and Komatsu ones, and Model is wrong on Stock No. 030 and 033 (show "D3K2 XL", titles say D6K2 XL). Reported to the client.
+- **Whole-word matching is deliberate:** "D3K2 XL" must not silently become "Caterpillar D3". Choosing a stand-in model is the client's call (open question 8). Variants of the same model do match ("D6T XL VPAT" → D6T XL, "D1 LGP" → D1, "336 DL" → 336).
+- **Unmatched listings still open on the default R18 PRO** with the listing's price, hours and year. Proposed to the client: the tool asks the buyer to pick the closest model instead, plus an approved closest-model list added to the snippet's aliases.
 
 ### B5. Homepage placement
 - **Nav:** a top-level menu item **"Earner-Pro"**. Not nested under Used Machinery.
 - **Banner:** above the fold on the homepage.
 - **Links:** both go to the **blank** tool. Suggested: add `?src=nav` and `?src=home-banner` so analytics can tell them apart.
+- **Staging:** the menu item is in (`/earner-pro/?src=nav`, between Finance and About Us). The menu was also tidied: Home removed, Hire + Hire to Buy merged under one Hire item, Price Guide links removed. Still to do: label it "Earner-Pro"; rename Rippa's "Skid Steers" item (it links to `/ap_category/backhoe-loader/`) to "Backhoe Loader"; remove the non-clickable lines under About Us and Contact Us. The homepage is an Elementor page; the banner goes in a new container directly under the hero.
 
 ### B6. Rippa pages
-- There are 4 Rippa products, all new 2026 stock, so `hours=0` and `wear=0` are accurate: **R18 PRO, RL06, RS03, RS06 PRO**. RL06's slug has a typo ("ripper"), so don't derive the model from the slug.
+- **Live site (audit):** 4 Rippa products: R18 PRO, RL06, RS03, RS06 PRO. RL06's slug has a typo ("ripper").
+- **Staging:** 12 Rippa machines (R10, R13, R15, R18, R22, R32, RS03, RS04, RS06, RL06, RB06, RB18) plus forklifts, on a custom template with no Make, Model or price fields. `machines.json` has 4 Rippa models: R18 PRO, R25, RS06 PRO, RL06. Only RL06 pre-loads today, through the alias list in the snippet. R18 → R18 PRO and RS06 → RS06 PRO are ready in the snippet as commented-out lines, waiting for the client to confirm they're the same machines.
 - **Open question:** the brief says the Rippa buttons pre-load **R18 PRO**; the alternative is each page's own model. Check with the client.
 
 ### B7. Updating machine data
@@ -263,8 +288,12 @@ Points to handle:
 | 5 | Should the lead include the compare machine? | Yes in the payload/Sheet, not in the email |
 | 6 | New lead on later visits after the first unlock? | No, the first unlock only |
 | 7 | Add hours and wear fields to listings? | — |
-| 8 | What should happen for listings not in the 107 machines? | Other params apply to the default machine (see §5) |
+| 8 | What should happen for listings not in the 107 machines? Asked 29 Oct, with a proposed "pick the closest model" prompt and a closest-model list for approval | Other params apply to the default machine (see §5, B4) |
 | 9 | May we fix the V3.1 toggle bug (below)? | Not fixed |
+| 10 | Are staging's Rippa R18 / RS06 the same as the tool's R18 PRO / RS06 PRO? | Not mapped (B6) |
+| 11 | Who corrects the listing data (Make on all used listings, Model on Stock 030/033, the D6N sweep's category)? | The snippet works around it |
+| 12 | OK to keep the menu changes (Home removed, Hire merged)? | Changed on staging |
+| 13 | Does the staging rebuild replace the live site, or do the changes need porting to the live WooCommerce setup? | The snippet only works on the Advanced Product build |
 
 **Known V3.1 bug (awaiting client approval):**
 - **Where:** the operator-mode click handler binds to every `.tbtn`, and the Finance/Cash buttons share that class.

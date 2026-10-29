@@ -1,0 +1,22 @@
+# Earner-Pro: served as plain static files (WordPress skips real folders)
+DirectoryIndex index.html
+Options -Indexes
+AddType application/manifest+json .webmanifest
+
+# Repo-only files: never served, even if the whole repo gets uploaded by mistake
+<IfModule mod_alias.c>
+  RedirectMatch 404 (?i)(\.md$|/wordpress/|/\.git)
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|sw\.js|machines\.json)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.png$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html application/json application/javascript text/javascript application/manifest+json
+</IfModule>

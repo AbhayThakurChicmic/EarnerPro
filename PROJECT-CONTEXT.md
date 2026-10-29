@@ -2,7 +2,7 @@
 
 Start here. This file covers **the client, the brief, what we found and where things stand**. The technical detail is in [HANDOFF.md](HANDOFF.md): URL and lead-payload contracts, caching, analytics, and backend task specs.
 
-Last updated **21 Oct 2026**.
+Last updated **29 Oct 2026**.
 
 ## Status at a glance
 
@@ -10,8 +10,12 @@ Last updated **21 Oct 2026**.
 |---|---|
 | Frontend (F1–F6) | **Done**, tested, on branch `feat/frontend-changes` |
 | Frontend leftovers | Need inputs from others: endpoint URL, GA4 ID, logo, client decisions. See "Pending" below |
-| Backend / server (B1–B7) | **Not started.** Waiting on domain confirmation and hosting/WordPress/Google access from the client |
-| Client inputs | Outstanding. See "Needed from the client" |
+| Backend / server (B1–B7) | **In progress on staging** (https://makintrak.projectlabs.in): tool hosted, menu item and listing buttons live; HTTPS redirect, homepage banner and lead endpoint still to do. Per-task table in HANDOFF §9 |
+| Client inputs | Outstanding. Status report with 11 questions sent 29 Oct. See "Needed from the client" |
+
+**Staging is a rebuild, not a copy of the live site.** It runs the Plazart theme with the Advanced Product plugin (listings at `/ap-product/<slug>/`), whereas the audit below describes the live WooCommerce site. Still to confirm: whether staging replaces the live site (HANDOFF §10, question 13).
+
+**Listing-match finding (29 Oct):** only 29 of the staging site's 139 listings name a model that is in the 107-machine database. The rest open on the default R18 PRO. The client has been asked to approve a "pick the closest model" prompt and a closest-model list. Details in HANDOFF §9 B4.
 
 Branches:
 - `main`: the client's original V3.1 file, untouched.
